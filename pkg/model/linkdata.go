@@ -1,13 +1,15 @@
 package model
 
+import "net/http"
+
 type LinkData struct {
-	Data     *Data
-	BackChan chan *Data
+	Data     *PtpData
+	BackChan chan *Meta
 }
 
-func NewLinkData(data *Data) *LinkData {
+func NewLinkData(r *http.Request) *LinkData {
 	return &LinkData{
-		data,
-		make(chan *Data),
+		Data:     NewPtpData(r),
+		BackChan: make(chan *Meta),
 	}
 }

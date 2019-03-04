@@ -2,7 +2,6 @@ package model
 
 import (
 	"gitlab.com/jonas.jasas/buffreader"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -10,17 +9,16 @@ import (
 	"time"
 )
 
-type Data struct {
+type Meta struct {
 	Time        time.Time
 	ContentType string
 	Method      string
 	Query       string
 	SrcIP       string
 	SrcPort     string
-	Content     *buffreader.BuffReader
 }
 
-func NewData(r *http.Request) *Data {
+func NewMeta(r *http.Request) *Meta {
 	t := time.Now()
 	contentType := r.Header.Get("Content-Type")
 	srcIP := r.Header.Get("X-Real-IP")
@@ -30,7 +28,7 @@ func NewData(r *http.Request) *Data {
 	content := buffreader.New(r.Body)
 	content.Buff()
 
-	return &Data{t, contentType, method, query.Encode(), srcIP, srcPort, content}
+	return &Meta{t, contentType, method, query.Encode(), srcIP, srcPort}
 }
 
 func filterQuery(query url.Values) (filtered url.Values) {
@@ -45,7 +43,7 @@ func filterQuery(query url.Values) (filtered url.Values) {
 	return
 }
 
-func (this *Data) Size() int {
+func (this *Meta) Size() int {
 	if this == nil {
 		return 0
 	} else {
@@ -53,7 +51,7 @@ func (this *Data) Size() int {
 	}
 }
 
-func (this *Data) Write(w http.ResponseWriter, yourTime time.Time, expose []string) (err error) {
+func (this *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string) {
 	w.Header().Set("Content-Type", this.ContentType)
 	w.Header().Set("X-Real-IP", this.SrcIP)
 	w.Header().Set("X-Real-Port", this.SrcPort)
@@ -63,9 +61,6 @@ func (this *Data) Write(w http.ResponseWriter, yourTime time.Time, expose []stri
 	w.Header().Set("Httprelay-Query", this.Query)
 	expose = append([]string{"X-Real-IP", "X-Real-Port", "Httprelay-Time", "Httprelay-Your-Time", "Httprelay-Method", "Httprelay-Query"}, expose...)
 	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
-	io.Copy(w, this.Content)
-	//log.Print(n)
-	return
 }
 
 func toUnixMilli(t time.Time) string {

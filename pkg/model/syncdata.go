@@ -1,13 +1,17 @@
 package model
 
+import (
+	"net/http"
+)
+
 type SyncData struct {
-	Data     *Data
-	BackChan chan *Data
+	Data     *PtpData
+	BackChan chan *PtpData
 }
 
-func NewSyncData(data *Data) *SyncData {
+func NewSyncData(r *http.Request) *SyncData {
 	return &SyncData{
-		data,
-		make(chan *Data),
+		Data:     NewPtpData(r),
+		BackChan: make(chan *PtpData),
 	}
 }

@@ -48,8 +48,12 @@ func NewServer(args Args) (server *Server, err error) {
 	linkCtrl := controller.NewLinkCtrl(linkRep, server.stopChan)
 	http.HandleFunc("/link/", linkCtrl.Conduct)
 
-	server.outdaters = []repository.Outdater{linkRep}
-	server.waiters = []Waiter{syncCtrl, linkCtrl}
+	mcastRep := repository.NewMcastRep(server.stopChan)
+	mcastCtrl := controller.NewMcastCtrl(mcastRep, server.stopChan)
+	http.HandleFunc("/mcast/", mcastCtrl.Conduct)
+
+	server.outdaters = []repository.Outdater{linkRep, mcastRep}
+	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl}
 
 	return
 }
@@ -62,7 +66,7 @@ func (s *Server) Start() {
 			log.Print("ERROR unable to serve: ", err)
 		}
 	}()
-	log.Println("Server listening to " + s.Addr().String())
+	log.Println("Server is listening on " + s.Addr().String())
 }
 
 func (s *Server) Stop(timeout time.Duration) {

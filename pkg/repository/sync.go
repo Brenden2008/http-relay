@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
+	"net/http"
 	"sync"
 )
 
@@ -23,11 +24,11 @@ func NewSyncRep(stopChan <-chan struct{}) *SyncRep {
 	}
 }
 
-func (sr *SyncRep) Conduct(id string, data *model.Data, cancelChan <-chan struct{}) (peerData *model.Data, ok bool) {
+func (sr *SyncRep) Conduct(id string, r *http.Request, cancelChan <-chan struct{}) (ptpData *model.PtpData, ok bool) {
 	sr.AddWaiter()
 	defer sr.RemoveWaiter()
 
-	var syncData *model.SyncData
+	syncData := model.NewSyncData(r)
 	sr.Lock()
 	syncDataChan, exist := sr.syncMap[id]
 	if exist {
@@ -36,7 +37,6 @@ func (sr *SyncRep) Conduct(id string, data *model.Data, cancelChan <-chan struct
 	} else {
 		// A - peer
 		syncDataChan = make(chan *model.SyncData, 1)
-		syncData = model.NewSyncData(data)
 		syncDataChan <- syncData
 		sr.syncMap[id] = syncDataChan
 	}
@@ -49,9 +49,9 @@ func (sr *SyncRep) Conduct(id string, data *model.Data, cancelChan <-chan struct
 		select {
 		case syncData = <-syncDataChan:
 			// As chan is buffered so one value always should be present
-			peerData = syncData.Data
+			ptpData = syncData.Data
 			select {
-			case syncData.BackChan <- data:
+			case syncData.BackChan <- syncData.Data:
 				ok = true
 			case <-syncDataChan: // A peer exited
 			case <-cancelChan:
@@ -63,7 +63,7 @@ func (sr *SyncRep) Conduct(id string, data *model.Data, cancelChan <-chan struct
 	} else {
 		// A - peer
 		select {
-		case peerData = <-syncData.BackChan:
+		case ptpData = <-syncData.BackChan:
 			ok = true
 		case <-cancelChan:
 		case <-sr.stopChan:

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
+	"net/http"
 	"sync"
 )
 
@@ -21,7 +22,7 @@ func NewLinkRep(stopChan <-chan struct{}) *LinkRep {
 	return lnk
 }
 
-func (lr *LinkRep) Read(id string, data *model.Data, closeChan <-chan struct{}) (peerData *model.Data, ok bool) {
+func (lr *LinkRep) Read(id string, r *http.Request, closeChan <-chan struct{}) (ptpData *model.PtpData, ok bool) {
 	lr.Lock()
 	link := lr.getOrCreate(id)
 	lr.Unlock()
@@ -29,11 +30,12 @@ func (lr *LinkRep) Read(id string, data *model.Data, closeChan <-chan struct{}) 
 	link.AddWaiter()
 	defer link.RemoveWaiter()
 
+	meta := model.NewMeta(r)
 	select {
 	case linkData := <-link.Chan():
 		select {
-		case linkData.BackChan <- data:
-			peerData = linkData.Data
+		case linkData.BackChan <- meta:
+			ptpData = linkData.Data
 			ok = true
 		case <-closeChan:
 		case <-lr.stopChan:
@@ -44,7 +46,7 @@ func (lr *LinkRep) Read(id string, data *model.Data, closeChan <-chan struct{}) 
 	return
 }
 
-func (lr *LinkRep) Write(id string, data *model.Data, wSecret string, closeChan <-chan struct{}) (getData *model.Data, ok bool, auth bool) {
+func (lr *LinkRep) Write(id string, linkData *model.LinkData, wSecret string, closeChan <-chan struct{}) (meta *model.Meta, ok bool, auth bool) {
 	lr.Lock()
 	link := lr.getOrCreate(id)
 	lr.Unlock()
@@ -58,11 +60,10 @@ func (lr *LinkRep) Write(id string, data *model.Data, wSecret string, closeChan 
 	link.AddWaiter()
 	defer link.RemoveWaiter()
 
-	linkData := model.NewLinkData(data)
 	select {
 	case link.Chan() <- linkData:
 		select {
-		case getData, ok = <-linkData.BackChan:
+		case meta, ok = <-linkData.BackChan:
 			link.Accessed()
 		case <-closeChan:
 		case <-lr.stopChan:

@@ -8,8 +8,8 @@ import (
 )
 
 type LinkRep interface {
-	Read(id string, data *model.Data, cancelChan <-chan struct{}) (peerData *model.Data, ok bool)
-	Write(id string, data *model.Data, wSecret string, cancelChan <-chan struct{}) (getData *model.Data, ok bool, auth bool)
+	Read(id string, r *http.Request, cancelChan <-chan struct{}) (ptpData *model.PtpData, ok bool)
+	Write(id string, linkData *model.LinkData, wSecret string, cancelChan <-chan struct{}) (meta *model.Meta, ok bool, auth bool)
 }
 
 type LinkCtrl struct {
@@ -42,22 +42,21 @@ func (lc *LinkCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 	pathArr := strings.Split(r.URL.Path, "/")
 	id := pathArr[len(pathArr)-1]
 
-	data := model.NewData(r)
 	yourTime := time.Now()
 
 	if strings.EqualFold(r.Method, http.MethodGet) {
-		if peerData, ok := lc.rep.Read(id, data, r.Context().Done()); ok {
+		if ptpData, ok := lc.rep.Read(id, r, r.Context().Done()); ok {
 			lc.AddWaiter()
-			<-data.Content.Buff()
-			peerData.Write(w, yourTime, nil)
+			ptpData.Write(w, yourTime, nil)
 			lc.RemoveWaiter()
 		} else {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
 	} else if strings.EqualFold(r.Method, http.MethodPost) {
-		if peerData, ok, auth := lc.rep.Write(id, data, wSecret(r), r.Context().Done()); ok && auth {
-			<-data.Content.Buff()
-			peerData.Write(w, yourTime, nil)
+		linkData := model.NewLinkData(r)
+		if meta, ok, auth := lc.rep.Write(id, linkData, wSecret(r), r.Context().Done()); ok && auth {
+			<-linkData.Data.Content.Buff()
+			meta.Write(w, yourTime, nil)
 		} else {
 			if auth {
 				w.WriteHeader(http.StatusServiceUnavailable)
