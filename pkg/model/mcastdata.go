@@ -26,7 +26,12 @@ func (md *McastData) Write(data *TeeData) {
 }
 
 func (md *McastData) Size() int {
-	return md.data.Content.Size()
+	select {
+	case <-md.changeChan:
+		return md.data.Content.Size()
+	default:
+		return 0
+	}
 }
 
 //func (this *McastData) IsEmpty() bool {

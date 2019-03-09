@@ -2,9 +2,7 @@ package integration
 
 import (
 	"bytes"
-	"gitlab.com/jonas.jasas/httprelay/pkg/controller"
 	"gitlab.com/jonas.jasas/rwmock"
-	"golang.org/x/net/context"
 	"io"
 	"math/rand"
 	"net/http"
@@ -21,43 +19,31 @@ func genId(n int) string {
 	return string(b)
 }
 
-func doReq(method, path string, body io.Reader) *httptest.ResponseRecorder {
+func doReq(handler http.HandlerFunc, method, path string, body io.Reader) *httptest.ResponseRecorder {
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest(method, path, body)
 
-	cancelChan := make(chan struct{})
-	srvState := controller.NewSrvState()
-	reqCtx := controller.NewReqCtx(cancelChan, srvState)
-	ctx := req.Context()
-	ctx = context.WithValue(ctx, controller.ReqCtxKey, reqCtx)
-	req = req.WithContext(ctx)
-
-	//controller.Sync(resp, req)
-	handler := http.HandlerFunc(controller.Sync)
 	handler.ServeHTTP(resp, req)
 
 	return resp
 }
 
-func doReqPair(methodA, methodB, pathA, pathB string, bodyA, bodyB []byte) bool {
+func doReqPair(handler http.HandlerFunc, methodA, methodB, pathA, pathB string, bodyA, bodyB []byte) ([]byte, []byte) {
 
-	respAChan := make(chan *httptest.ResponseRecorder)
+	respAChan := make(chan *httptest.ResponseRecorder, 1)
 
 	rA := rwmock.NewShaperRand(bytes.NewReader(bodyA), 1, 1000, 0, time.Microsecond)
 	rB := rwmock.NewShaperRand(bytes.NewReader(bodyB), 1, 1000, 0, time.Microsecond)
 
 	go func() {
 		time.Sleep(time.Duration(rand.Int63n(1000000)))
-		respAChan <- doReq(methodA, pathA, rA)
+		respAChan <- doReq(handler, methodA, pathA, rA)
 	}()
 
 	time.Sleep(time.Duration(rand.Int63n(1000000)))
-	respB := doReq(methodB, pathB, rB)
+	respB := doReq(handler, methodB, pathB, rB)
 
 	respA := <-respAChan
 
-	a := respA.Body.Bytes()
-	b := respB.Body.Bytes()
-
-	return bytes.Compare(a, bodyB) == 0 && bytes.Compare(b, bodyA) == 0
+	return respA.Body.Bytes(), respB.Body.Bytes()
 }

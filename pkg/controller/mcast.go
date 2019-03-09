@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -45,7 +46,7 @@ func (mc *McastCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 
 		if data, seqId, ok := mc.rep.Read(mcastId, seqId, closeChan); ok {
 			writeHeaders(w, r, seqId, data, yourTime, cache)
-			data.CopyContent()
+			io.Copy(w, data.Content.NewReader())
 		} else {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}

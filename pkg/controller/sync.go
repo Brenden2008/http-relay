@@ -8,7 +8,7 @@ import (
 )
 
 type SyncRep interface {
-	Conduct(id string, r *http.Request, cancelChan <-chan struct{}) (ptpData *model.PtpData, ok bool)
+	Conduct(id string, syncData *model.SyncData, cancelChan <-chan struct{}) (ptpData *model.PtpData, ok bool)
 }
 
 type SyncCtrl struct {
@@ -42,8 +42,9 @@ func (sc *SyncCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 	pathArr := strings.Split(r.URL.Path, "/")
 	linkId := pathArr[len(pathArr)-1]
 
-	if ptpData, ok := sc.rep.Conduct(linkId, r, r.Context().Done()); ok {
-		<-ptpData.Content.Buff()
+	syncData := model.NewSyncData(r)
+	if ptpData, ok := sc.rep.Conduct(linkId, syncData, r.Context().Done()); ok {
+		<-syncData.Data.Content.Buff()
 		ptpData.Write(w, yourTime, nil)
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)

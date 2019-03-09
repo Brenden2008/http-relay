@@ -1,21 +1,24 @@
 package model
 
 import (
-	"gitlab.com/jonas.jasas/buffreader"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 type Meta struct {
-	Time        time.Time
-	ContentType string
-	Method      string
-	Query       string
-	SrcIP       string
-	SrcPort     string
+	Time          time.Time
+	ContentType   string
+	Method        string
+	Query         string
+	SrcIP         string
+	SrcPort       string
+	ContentLength int64
+	// After altering structure Size() method must be updated
 }
 
 func NewMeta(r *http.Request) *Meta {
@@ -23,12 +26,14 @@ func NewMeta(r *http.Request) *Meta {
 	contentType := r.Header.Get("Content-Type")
 	srcIP := r.Header.Get("X-Real-IP")
 	srcPort := r.Header.Get("X-Real-Port")
+	if srcIP == "" {
+		srcIP, srcPort, _ = net.SplitHostPort(r.RemoteAddr)
+	}
+
 	query := filterQuery(r.URL.Query())
 	method := r.Method
-	content := buffreader.New(r.Body)
-	content.Buff()
 
-	return &Meta{t, contentType, method, query.Encode(), srcIP, srcPort}
+	return &Meta{t, contentType, method, query.Encode(), srcIP, srcPort, r.ContentLength}
 }
 
 func filterQuery(query url.Values) (filtered url.Values) {
@@ -43,22 +48,26 @@ func filterQuery(query url.Values) (filtered url.Values) {
 	return
 }
 
-func (this *Meta) Size() int {
-	if this == nil {
-		return 0
-	} else {
-		return len(this.ContentType) + len(this.Query) + len(this.SrcIP) + len(this.SrcPort)
-	}
+func (m *Meta) Memory() int64 {
+	structSize := uint64(unsafe.Sizeof(m))
+	stringSize := len(m.ContentType) + len(m.Method) + len(m.Query) + len(m.SrcIP) + len(m.SrcPort)
+	return int64(structSize) + int64(stringSize)
 }
 
-func (this *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string) {
-	w.Header().Set("Content-Type", this.ContentType)
-	w.Header().Set("X-Real-IP", this.SrcIP)
-	w.Header().Set("X-Real-Port", this.SrcPort)
-	w.Header().Set("Httprelay-Time", toUnixMilli(this.Time))
+func (m *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string) {
+	w.Header().Set("Content-Type", m.ContentType)
+	if m.ContentLength > -1 {
+		// If length is known is better to set it or "Transfer-Encoding: chunked" will be used
+		w.Header().Set("Content-Length", strconv.FormatInt(m.ContentLength, 10))
+	}
+	w.Header().Set("X-Real-IP", m.SrcIP)
+	w.Header().Set("X-Real-Port", m.SrcPort)
+	w.Header().Set("Httprelay-Time", toUnixMilli(m.Time))
 	w.Header().Set("Httprelay-Your-Time", toUnixMilli(yourTime))
-	w.Header().Set("Httprelay-Method", this.Method)
-	w.Header().Set("Httprelay-Query", this.Query)
+	w.Header().Set("Httprelay-Method", m.Method)
+	if m.Query != "" {
+		w.Header().Set("Httprelay-Query", m.Query)
+	}
 	expose = append([]string{"X-Real-IP", "X-Real-Port", "Httprelay-Time", "Httprelay-Your-Time", "Httprelay-Method", "Httprelay-Query"}, expose...)
 	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
 }

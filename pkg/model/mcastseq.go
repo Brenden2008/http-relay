@@ -18,23 +18,24 @@ func NewMcastSeq(initialSeqId int) *McastSeq {
 		mcastDataMap: initialMap,
 		newSeqId:     initialSeqId,
 		oldSeqId:     initialSeqId,
+		comm:         newComm(),
 	}
 }
 
-func (this *McastSeq) Close() {
-	this.RLock()
-	defer this.RUnlock()
-	for _, v := range this.mcastDataMap {
+func (ms *McastSeq) Close() {
+	ms.RLock()
+	defer ms.RUnlock()
+	for _, v := range ms.mcastDataMap {
 		v.Close()
 	}
 }
 
-func (this *McastSeq) GetData(seqId int) (data *TeeData, ok bool) {
-	this.RLock()
-	defer this.RUnlock()
+func (ms *McastSeq) GetData(seqId int) (data *TeeData, ok bool) {
+	ms.RLock()
+	defer ms.RUnlock()
 
-	if seqId < this.newSeqId {
-		if mcastData, ok := this.mcastDataMap[seqId]; ok {
+	if seqId < ms.newSeqId {
+		if mcastData, ok := ms.mcastDataMap[seqId]; ok {
 			return mcastData.data, ok
 		}
 	}
@@ -42,85 +43,85 @@ func (this *McastSeq) GetData(seqId int) (data *TeeData, ok bool) {
 	return
 }
 
-func (this *McastSeq) Read(wantedSeqId int, closeChan <-chan struct{}) (data *TeeData, seqId int, ok bool) {
-	this.AddWaiter()
-	defer this.RemoveWaiter()
+func (ms *McastSeq) Read(wantedSeqId int, closeChan <-chan struct{}) (data *TeeData, seqId int, ok bool) {
+	ms.AddWaiter()
+	defer ms.RemoveWaiter()
 
-	this.Lock()
+	ms.Lock()
 	if wantedSeqId == -1 {
-		if this.newSeqId == this.oldSeqId {
-			seqId = this.newSeqId
+		if ms.newSeqId == ms.oldSeqId {
+			seqId = ms.newSeqId
 		} else {
-			seqId = this.newSeqId - 1
+			seqId = ms.newSeqId - 1
 		}
-	} else if wantedSeqId > this.newSeqId {
-		seqId = this.newSeqId
-	} else if wantedSeqId < this.oldSeqId {
-		seqId = this.oldSeqId
+	} else if wantedSeqId > ms.newSeqId {
+		seqId = ms.newSeqId
+	} else if wantedSeqId < ms.oldSeqId {
+		seqId = ms.oldSeqId
 	} else {
 		seqId = wantedSeqId
 	}
 
-	mcastData := this.mcastDataMap[seqId]
-	this.Unlock()
+	mcastData := ms.mcastDataMap[seqId]
+	ms.Unlock()
 
 	data, ok = mcastData.Read(closeChan)
 	return
 }
 
-func (this *McastSeq) Write(data *TeeData) (seqId int) {
-	this.Lock()
-	defer this.Unlock()
+func (ms *McastSeq) Write(data *TeeData) (seqId int) {
+	ms.Lock()
+	defer ms.Unlock()
 
-	this.accessed = time.Now()
-	seqId = this.newSeqId
-	mcastData := this.mcastDataMap[seqId]
+	ms.accessed = time.Now()
+	seqId = ms.newSeqId
+	mcastData := ms.mcastDataMap[seqId]
 	mcastData.Write(data)
-	this.preserveSize()
-	this.newSeqId += 1
-	this.mcastDataMap[this.newSeqId] = NewMcastData()
+	ms.preserveSize()
+	ms.newSeqId += 1
+	ms.mcastDataMap[ms.newSeqId] = NewMcastData()
 	return
 }
 
-func (this *McastSeq) preserveSize() {
-	for this.size() > 11000000 { // Total allowed 11Mb while reqest limited 10Mb
-		this.removeOldest()
+func (ms *McastSeq) preserveSize() {
+	for ms.size() > 11000000 { // Total allowed 11Mb while reqest limited 10Mb
+		ms.removeOldest()
 	}
 }
 
-func (this *McastSeq) removeOldest() {
-	if this.oldSeqId < this.newSeqId {
-		this.remove(this.oldSeqId)
-		this.oldSeqId += 1
+func (ms *McastSeq) removeOldest() {
+	if ms.oldSeqId < ms.newSeqId {
+		ms.remove(ms.oldSeqId)
+		ms.oldSeqId += 1
 	}
 }
 
-func (this *McastSeq) remove(seqId int) {
-	if mcastData, ok := this.mcastDataMap[seqId]; ok {
-		delete(this.mcastDataMap, seqId)
+func (ms *McastSeq) remove(seqId int) {
+	if mcastData, ok := ms.mcastDataMap[seqId]; ok {
+		delete(ms.mcastDataMap, seqId)
 		mcastData.Close()
 	}
 }
 
-func (this *McastSeq) size() (size int) {
-	for _, v := range this.mcastDataMap {
+func (ms *McastSeq) size() (size int) {
+	for _, v := range ms.mcastDataMap {
 		size += v.Size()
 	}
 	return
 }
 
-func (this *McastSeq) Size() int {
-	this.RLock()
-	defer this.RUnlock()
-	return this.size()
+func (ms *McastSeq) Size() int {
+	ms.RLock()
+	defer ms.RUnlock()
+	return ms.size()
 }
 
-func (this *McastSeq) DataCount() int {
-	this.RLock()
-	defer this.RUnlock()
-	return len(this.mcastDataMap)
+func (ms *McastSeq) DataCount() int {
+	ms.RLock()
+	defer ms.RUnlock()
+	return len(ms.mcastDataMap)
 }
 
-func (this *McastSeq) NewSeqId() int {
-	return this.newSeqId
+func (ms *McastSeq) NewSeqId() int {
+	return ms.newSeqId
 }

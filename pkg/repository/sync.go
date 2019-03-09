@@ -2,7 +2,6 @@ package repository
 
 import (
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
-	"net/http"
 	"sync"
 )
 
@@ -24,11 +23,10 @@ func NewSyncRep(stopChan <-chan struct{}) *SyncRep {
 	}
 }
 
-func (sr *SyncRep) Conduct(id string, r *http.Request, cancelChan <-chan struct{}) (ptpData *model.PtpData, ok bool) {
+func (sr *SyncRep) Conduct(id string, syncData *model.SyncData, cancelChan <-chan struct{}) (ptpData *model.PtpData, ok bool) {
 	sr.AddWaiter()
 	defer sr.RemoveWaiter()
 
-	syncData := model.NewSyncData(r)
 	sr.Lock()
 	syncDataChan, exist := sr.syncMap[id]
 	if exist {
@@ -47,11 +45,11 @@ func (sr *SyncRep) Conduct(id string, r *http.Request, cancelChan <-chan struct{
 	if exist {
 		// B - peer
 		select {
-		case syncData = <-syncDataChan:
+		case peerSyncData := <-syncDataChan:
 			// As chan is buffered so one value always should be present
-			ptpData = syncData.Data
+			ptpData = peerSyncData.Data
 			select {
-			case syncData.BackChan <- syncData.Data:
+			case peerSyncData.BackChan <- syncData.Data:
 				ok = true
 			case <-syncDataChan: // A peer exited
 			case <-cancelChan:
