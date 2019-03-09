@@ -1,0 +1,15 @@
+image: golang
+variables:
+  GIT_STRATEGY: none
+  REPO_NAME: gitlab.com/jonas.jasas/httprelay
+stages:
+  - test
+before_script:
+  - go get $REPO_NAME
+  - cd $GOPATH/src/$REPO_NAME
+  - go get -t ./...
+test:
+  stage: test
+  script:
+    - go build --race ./...
+    - go test $REPO_NAME/test/... -cover
