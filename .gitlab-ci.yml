@@ -11,5 +11,5 @@ before_script:
 test:
   stage: test
   script:
-    - go build --race ./...
-    - go test $REPO_NAME/test/... -cover
+    - go build --race ./cmd/...
+    - go test ./test/... -cover
