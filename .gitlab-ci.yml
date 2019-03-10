@@ -23,7 +23,7 @@ build:
 
   artifacts:
     paths:
-      - bin/
+      - ./bin/
 
   script:
     - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
