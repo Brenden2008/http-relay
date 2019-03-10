@@ -8,15 +8,15 @@ before_script:
   - echo $GOPATH
   - echo $CI_PROJECT_NAMESPACE
   - echo $CI_PROJECT_DIR
-#  - mkdir -p $NS_DIR
-#  - ln -s $CI_PROJECT_DIR $PROJ_DIR
-#  - cd $PROJ_DIR
-#
-#stages:
-#  - test
-#
-#test:
-#  stage: test
-#  script:
-#    - go build --race ./cmd/...
-#    - go test ./test/... -cover
+  - mkdir -p $NS_DIR
+  - ln -s $CI_PROJECT_DIR $PROJ_DIR
+  - cd $PROJ_DIR
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - go build --race ./cmd/...
+    - go test ./test/... -cover
