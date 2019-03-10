@@ -10,9 +10,23 @@ before_script:
 
 stages:
   - test
+  - build
 
 test:
   stage: test
   script:
     - go build --race ./cmd/...
     - go test ./test/... -cover
+
+build:
+  stage: build
+
+  artifacts:
+    paths:
+      - bin/
+
+  script:
+    - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME
+    - GOOS=linux GOARCH=arm go build -o bin/$CI_PROJECT_NAME
+    - GOOS=windows GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME.exe
+    - GOOS=darwin GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME
