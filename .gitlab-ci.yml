@@ -5,15 +5,18 @@ variables:
   PROJ_DIR: $NS_DIR/$CI_PROJECT_NAME
 
 before_script:
-  - mkdir -p $NS_DIR
-  - ln -s $CI_PROJECT_DIR $PROJ_DIR
-  - cd $PROJ_DIR
-
-stages:
-  - test
-
-test:
-  stage: test
-  script:
-    - go build --race ./cmd/...
-    - go test ./test/... -cover
+  - echo $GOPATH
+  - echo $CI_PROJECT_NAMESPACE
+  - echo $CI_PROJECT_DIR
+#  - mkdir -p $NS_DIR
+#  - ln -s $CI_PROJECT_DIR $PROJ_DIR
+#  - cd $PROJ_DIR
+#
+#stages:
+#  - test
+#
+#test:
+#  stage: test
+#  script:
+#    - go build --race ./cmd/...
+#    - go test ./test/... -cover
