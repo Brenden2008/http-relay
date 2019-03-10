@@ -26,26 +26,23 @@ build:
 
   script:
     - mkdir download
+
     - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
     - rm -r bin
 
-    - mkdir download
     - GOOS=linux GOARCH=arm go build -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
     - rm -r bin
 
-    - mkdir download
     - GOOS=linux GOARCH=arm64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
     - rm -r bin
 
-    - mkdir download
     - GOOS=windows GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
     - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
     - rm -r bin
 
-    - mkdir download
     - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
     - rm -r bin
