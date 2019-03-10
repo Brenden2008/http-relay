@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"syscall"
 	"time"
 )
 
@@ -76,7 +75,7 @@ func (s *Server) Stop(timeout time.Duration) {
 	s.Close()
 	if s.Addr().Network() == "unix" {
 		os.Remove(s.Addr().String())
-		syscall.Umask(0000)
+		//syscall.Umask(0000)
 	}
 	log.Println("done.")
 }
@@ -107,7 +106,7 @@ func newTcpListener(addr string, port int) (listener net.Listener, err error) {
 
 func newUnixListener(socketPath string) (listener net.Listener, err error) {
 	os.Remove(socketPath)
-	syscall.Umask(0000)
+	//syscall.Umask(0000)
 	listener, err = net.Listen("unix", socketPath)
 	return
 }
