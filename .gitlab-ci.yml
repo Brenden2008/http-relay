@@ -11,12 +11,6 @@ before_script:
 stages:
   - build
 
-test:
-  stage: test
-  script:
-    - go build --race ./cmd/...
-    - go test ./test/... -cover
-
 build:
   stage: build
 
