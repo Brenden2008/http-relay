@@ -9,7 +9,14 @@ before_script:
   - go get ./...
 
 stages:
+  - test
   - build
+
+test:
+  stage: test
+  script:
+    - go build --race ./cmd/...
+    - go test ./test/... -cover
 
 build:
   stage: build
@@ -19,4 +26,8 @@ build:
       - bin/
 
   script:
-    - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
+    - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME_lin ./cmd/...
+    - zip -q -j -m -9 bin/httprelay_lin.zip bin/httprelay_lin
+#    - GOOS=linux GOARCH=arm go build -o bin/$CI_PROJECT_NAME ./cmd/...
+#    - GOOS=windows GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME.exe ./cmd/...
+#    - GOOS=darwin GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
