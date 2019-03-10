@@ -9,7 +9,7 @@ before_script:
   - go get ./...
 
 stages:
-  - test
+#  - test
   - build
 
 test:
@@ -26,7 +26,7 @@ build:
       - bin/
 
   script:
-    - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME
-    - GOOS=linux GOARCH=arm go build -o bin/$CI_PROJECT_NAME
-    - GOOS=windows GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME.exe
-    - GOOS=darwin GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME
+    - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
+    - GOOS=linux GOARCH=arm go build -o bin/$CI_PROJECT_NAME ./cmd/...
+    - GOOS=windows GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME.exe ./cmd/...
+    - GOOS=darwin GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
