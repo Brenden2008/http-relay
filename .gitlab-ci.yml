@@ -10,7 +10,6 @@ before_script:
 
 stages:
   - build
-  - test
 
 test:
   stage: test
@@ -27,6 +26,3 @@ build:
 
   script:
     - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
-    - GOOS=linux GOARCH=arm go build -o bin/$CI_PROJECT_NAME ./cmd/...
-    - GOOS=windows GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME.exe ./cmd/...
-    - GOOS=darwin GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
