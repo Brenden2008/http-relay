@@ -9,8 +9,8 @@ before_script:
   - go get ./...
 
 stages:
-#  - test
   - build
+  - test
 
 test:
   stage: test
@@ -23,7 +23,7 @@ build:
 
   artifacts:
     paths:
-      - ./bin/
+      - bin/
 
   script:
     - GOOS=linux GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME ./cmd/...
