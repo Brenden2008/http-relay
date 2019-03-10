@@ -9,13 +9,14 @@ before_script:
   - go get ./...
 
 stages:
+  - test
   - build
 
-#test:
-#  stage: test
-#  script:
-#    - go build --race ./cmd/...
-#    - go test ./test/... -cover
+test:
+  stage: test
+  script:
+    - go build --race ./cmd/...
+    - go test ./test/... -cover
 
 build:
   stage: build
