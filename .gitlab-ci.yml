@@ -22,11 +22,12 @@ build:
 
   artifacts:
     paths:
-      - bin/
+      - download/
 
   script:
-    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}_lin ./cmd/...
-    - gzip --best --quiet bin/httprelay_lin
+    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
+    - rm -r bin
 #    - zip -q -j -m -9 bin/httprelay_lin.zip bin/httprelay_lin
 #    - GOOS=linux GOARCH=arm go build -o bin/$CI_PROJECT_NAME ./cmd/...
 #    - GOOS=windows GOARCH=amd64 go build -o bin/$CI_PROJECT_NAME.exe ./cmd/...
