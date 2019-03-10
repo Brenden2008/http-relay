@@ -6,7 +6,7 @@ before_script:
   - mkdir -p $NS_DIR
   - ln -s $CI_PROJECT_DIR $PROJ_DIR
   - cd $PROJ_DIR
-  - go get ./pkg/...
+  - go get ./...
 
 stages:
   - test
