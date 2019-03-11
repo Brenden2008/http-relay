@@ -9,24 +9,21 @@ before_script:
   - go get ./...
 
 stages:
-  - buildz
   - test
-  - build
   - deploy
 
-buildjob:
-  stage: buildz
+test race:
+  stage: test
   script:
     - go build --race ./cmd/...
 
-test:
+test integration:
   stage: test
   script:
     - go test ./test/... -cover
 
-build:
-  stage: build
-
+deploy downloads:
+  stage: deploy
   artifacts:
     paths:
       - download/
@@ -57,3 +54,11 @@ build:
     - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
     - rm -r bin
+
+deploy docker:
+  stage: deploy
+
+  script:
+    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/...
+    - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
+    - docker build -t httprelay .
