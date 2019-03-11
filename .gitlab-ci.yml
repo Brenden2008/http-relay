@@ -9,12 +9,13 @@ before_script:
   - go get ./...
 
 stages:
-  - build
+  - buildz
   - test
+  - build
   - deploy
 
 buildjob:
-  stage: build
+  stage: buildz
   script:
     - go build --race ./cmd/...
 
