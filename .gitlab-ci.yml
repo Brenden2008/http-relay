@@ -85,7 +85,6 @@ build docker:
   script:
     - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/...
 
-
 deploy docker:
   stage: deploy
   image: docker
