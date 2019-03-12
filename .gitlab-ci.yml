@@ -10,7 +10,7 @@
 
 stages:
   - build
-  - test
+#  - test
   - deploy
 
 build:downloads:
@@ -22,37 +22,67 @@ build:downloads:
       - docker/
 
   script:
-    - mkdir download
-    - GOOS=linux GOARCH=386 go build -o bin1/${CI_PROJECT_NAME} ./cmd/... && tar -czf download/httprelay_linux_386.tar.gz -C bin1 . &
-    - GOOS=linux GOARCH=amd64 go build -o bin2/${CI_PROJECT_NAME} ./cmd/... && tar -czf download/httprelay_linux_amd64.tar.gz -C bin2 . &
-    - GOOS=linux GOARCH=arm go build -o bin3/${CI_PROJECT_NAME} ./cmd/... && tar -czf download/httprelay_linux_arm.tar.gz -C bin3 . &
-    - GOOS=linux GOARCH=arm64 go build -o bin4/${CI_PROJECT_NAME} ./cmd/... && tar -czf download/httprelay_linux_arm64.tar.gz -C bin4 . &
-    - GOOS=windows GOARCH=amd64 go build -o bin5/${CI_PROJECT_NAME}.exe ./cmd/... && tar -czf download/httprelay_windows_arm64.tar.gz -C bin5 . &
-    - GOOS=darwin GOARCH=amd64 go build -o bin6/${CI_PROJECT_NAME} ./cmd/... && tar -czf download/httprelay_macosx_arm64.tar.gz -C bin6 . &
+#    - mkdir download
+#
+#    - GOOS=linux GOARCH=386 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=windows GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+#    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
+#    - rm -r bin
 
     - mkdir docker
-    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/... &
+    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/...
 
-    - wait
+#test:race:
+#  stage: test
+#  extends: .prepare:go
+#  script:
+#    - go build --race ./cmd/...
+#
+#test:integration:
+#  stage: test
+#  extends: .prepare:go
+#  script:
+#    - go test ./test/... -cover
 
-test:race:
-  stage: test
-  extends: .prepare:go
-  script:
-    - go build --race ./cmd/...
+#build:docker:img:
+#  stage: deploy
+#  image: docker
+#  artifacts:
+#    paths:
+#      - docker/
+#  script:
+#    - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
+#    - systemctl start docker
+#    - docker build -t httprelay .
 
-test:integration:
-  stage: test
-  extends: .prepare:go
-  script:
-    - go test ./test/... -cover
 
 build:docker:img:
   stage: deploy
-  image: docker
-  artifacts:
-    paths:
-      - docker/
+  image: docker:stable
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
   script:
     - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
     - systemctl start docker
