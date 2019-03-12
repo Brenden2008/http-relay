@@ -86,5 +86,6 @@ deploy:docker:img:
   stage: deploy
   image: mesosphere/aws-cli
   entrypoint: aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
+
 #  script:
 #    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
