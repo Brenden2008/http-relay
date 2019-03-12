@@ -1,12 +1,12 @@
-image: golang
-
 .prepare:go:
+  image: golang:alpine
   before_script:
     - export NS_DIR=$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
     - export PROJ_DIR=$NS_DIR/$CI_PROJECT_NAME
     - mkdir -p $NS_DIR
     - ln -s $CI_PROJECT_DIR $PROJ_DIR
     - cd $PROJ_DIR
+    - apk update && apk add --no-cache git
     - go get ./...
 
 stages:
@@ -72,4 +72,5 @@ build:docker:img:
       - docker/
   script:
     - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
+    - systemctl start docker
     - docker build -t httprelay .
