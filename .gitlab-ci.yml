@@ -71,6 +71,7 @@ build:docker:img:
   services:
     - docker:dind
   variables:
+    GIT_STRATEGY: none
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
@@ -84,6 +85,8 @@ build:docker:img:
 
 deploy:docker:img:
   stage: deploy
+  variables:
+    GIT_STRATEGY: none
   image:
     name: robpco/awscli
     entrypoint:
