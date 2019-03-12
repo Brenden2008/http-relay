@@ -6,7 +6,6 @@ before_script:
   - mkdir -p $NS_DIR
   - ln -s $CI_PROJECT_DIR $PROJ_DIR
   - cd $PROJ_DIR
-  - mkdir download
   - go get ./...
 
 stages:
@@ -77,7 +76,7 @@ build macosx amd64:
     - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
 
-build docker:
+build:docker:app:
   stage: build
   artifacts:
     paths:
@@ -85,9 +84,11 @@ build docker:
   script:
     - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/...
 
-deploy docker:
-  stage: deploy
+build:docker:img:
+  stage: build
   image: docker
+  dependencies:
+    - build:docker:app
   artifacts:
     paths:
       - docker/
