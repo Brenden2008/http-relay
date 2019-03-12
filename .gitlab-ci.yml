@@ -85,5 +85,4 @@ build:docker:img:
     DOCKER_DRIVER: overlay2
   script:
     - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
-    - systemctl start docker
     - docker build -t httprelay .
