@@ -11,6 +11,7 @@
 stages:
   - build
   - test
+  - image
   - deploy
 
 build:downloads:
@@ -64,7 +65,7 @@ test:integration:
     - go test ./test/... -cover
 
 build:docker:img:
-  stage: deploy
+  stage: image
   image: docker:stable
   services:
     - docker:dind
@@ -79,3 +80,9 @@ build:docker:img:
     - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE:latest .
     - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
     - docker push $CONTAINER_IMAGE:latest
+
+deploy:docker:img:
+  stage: deploy
+  image: robpco/awscli
+  script:
+    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
