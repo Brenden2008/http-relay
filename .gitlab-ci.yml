@@ -80,6 +80,7 @@ build:docker:img:
   image: docker:stable
   services:
     - docker:dind
+
   variables:
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
     DOCKER_HOST: tcp://docker:2375
