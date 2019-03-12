@@ -84,8 +84,10 @@ build:docker:img:
 
 deploy:docker:img:
   stage: deploy
-  image: mesosphere/aws-cli
-  entrypoint: aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
-
-#  script:
-#    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
+  image:
+    name: robpco/awscli
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
