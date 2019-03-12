@@ -87,8 +87,6 @@ build:docker:app:
 build:docker:img:
   stage: build
   image: docker
-  dependencies:
-    - build:docker:app
   artifacts:
     paths:
       - docker/
