@@ -6,4 +6,4 @@ COPY docker/httprelay /httprelay
 USER nobody
 
 EXPOSE 8800
-ENTRYPOINT ["/entrypoint"]
+ENTRYPOINT ["/httprelay"]
