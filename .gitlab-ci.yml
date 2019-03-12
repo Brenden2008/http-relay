@@ -74,6 +74,9 @@ build:docker:img:
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
+  artifacts:
+    paths:
+      - docker/
   script:
     - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
@@ -84,6 +87,7 @@ build:docker:img:
 
 deploy:docker:img:
   stage: deploy
+  dependencies: []
   variables:
     GIT_STRATEGY: none
   image:
