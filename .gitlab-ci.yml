@@ -84,7 +84,7 @@ build:docker:img:
     - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
     - docker push $CONTAINER_IMAGE:latest
 
-deploy:docker:img:
+deploy:aws:
   stage: deploy
   dependencies: []
   variables:
