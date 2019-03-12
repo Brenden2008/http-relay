@@ -23,7 +23,7 @@ func init() {
 
 func main() {
 	log.SetPrefix(strconv.Itoa(os.Getpid()) + " ")
-	log.Println("3========================================================================")
+	log.Println("4========================================================================")
 	log.Println("Starting httprelay...")
 
 	server, _ := server.NewServer(args.serverArgs)
