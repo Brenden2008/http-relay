@@ -84,15 +84,15 @@ build:docker:img:
     - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
     - docker push $CONTAINER_IMAGE:latest
 
-deploy:aws:
-  stage: deploy
-  dependencies: []
-  variables:
-    GIT_STRATEGY: none
-  image:
-    name: robpco/awscli
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
+#deploy:aws:
+#  stage: deploy
+#  dependencies: []
+#  variables:
+#    GIT_STRATEGY: none
+#  image:
+#    name: robpco/awscli
+#    entrypoint:
+#      - '/usr/bin/env'
+#      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+#  script:
+#    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
