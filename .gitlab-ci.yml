@@ -14,7 +14,7 @@ stages:
   - image
   - deploy
 
-build:downloads:
+build:download:
   stage: build
   extends: .prepare:go
   artifacts:
