@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"gitlab.com/jonas.jasas/httprelay/pkg/controller"
 	"gitlab.com/jonas.jasas/httprelay/pkg/repository"
+	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -39,7 +41,9 @@ func NewServer(args Args) (server *Server, err error) {
 		server.Listener, err = newUnixListener(args.UnixSocket)
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		io.Copy(w, strings.NewReader("liau"))
+	})
 
 	syncRep := repository.NewSyncRep(server.stopChan)
 	syncCtrl := controller.NewSyncCtrl(syncRep, server.stopChan)
