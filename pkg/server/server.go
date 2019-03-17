@@ -39,6 +39,8 @@ func NewServer(args Args) (server *Server, err error) {
 		server.Listener, err = newUnixListener(args.UnixSocket)
 	}
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
+
 	syncRep := repository.NewSyncRep(server.stopChan)
 	syncCtrl := controller.NewSyncCtrl(syncRep, server.stopChan)
 	http.HandleFunc("/sync/", syncCtrl.Conduct)
