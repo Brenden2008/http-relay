@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httprelay-deployment
+  labels:
+    app: httprelay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httprelay
+  template:
+    metadata:
+      labels:
+        app: httprelay
+    spec:
+      containers:
+      - name: httprelay
+        image: registry.gitlab.com/jonas.jasas/httprelay
+        imagePullPolicy: 'Always'
+        ports:
+        - containerPort: 8800

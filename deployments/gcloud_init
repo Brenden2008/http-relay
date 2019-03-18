@@ -1,0 +1,29 @@
+#!/bin/bash
+set -x
+
+gcloud container clusters delete httprelay --quiet
+
+# Create static IP in GCloud
+#gcloud compute addresses create httprelay-ip --global
+
+gcloud container clusters create httprelay --zone=europe-west4-c --machine-type=g1-small --num-nodes=1 --cluster-version=1.12.5 --disk-size=10GB
+gcloud container clusters get-credentials httprelay
+kubectl apply -f deployment.yaml
+kubectl expose deployment httprelay-deployment --target-port=8800 --type=NodePort
+
+# LetsEncrypt https://github.com/ahmetb/gke-letsencrypt
+kubectl create serviceaccount -n kube-system tiller
+kubectl create clusterrolebinding tiller-binding \
+    --clusterrole=cluster-admin \
+    --serviceaccount kube-system:tiller
+helm init --wait --service-account tiller
+helm repo update
+helm install --name cert-manager --version v0.5.2 --namespace kube-system stable/cert-manager
+export EMAIL=jonas.jasas@gmail.com
+curl -sSL https://rawgit.com/ahmetb/gke-letsencrypt/master/yaml/letsencrypt-issuer.yaml |     sed -e "s/email: ''/email: $EMAIL/g" |     kubectl apply -f-
+
+kubectl apply -f ingress.yaml
+
+#kubectl apply -f gitlab.yaml
+# Get TOKEN for gitlab
+#kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab-admin | awk '{print $1}')
