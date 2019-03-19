@@ -103,8 +103,8 @@ k8s:deploy:prod:
   services:
     - docker:dind
   script:
-    — kubectl config set-cluster deploy-cluster --server="$K8S_URL" --insecure-skip-tls-verify=true
-    — kubectl config set-credentials deployer --token="$K8S_TOKEN"
-    — kubectl config set-context deploy-context --cluster=deploy-cluster --user=deployer
-    — kubectl config use-context deploy-context
-    — kubectl set image deployments/httprelay-deployment httprelay=registry.gitlab.com/jonas.jasas/httprelay
+    - kubectl config set-cluster deploy-cluster --server="$K8S_URL" --insecure-skip-tls-verify=true
+    - kubectl config set-credentials deployer --token="$K8S_TOKEN"
+    - kubectl config set-context deploy-context --cluster=deploy-cluster --user=deployer
+    - kubectl config use-context deploy-context
+    - kubectl set image deployments/httprelay-deployment httprelay=registry.gitlab.com/jonas.jasas/httprelay
