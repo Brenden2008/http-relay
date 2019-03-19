@@ -99,9 +99,12 @@ build:docker:img:
 
 k8s:deploy:prod:
   stage: deploy
+    dependencies: []
+    variables:
+      GIT_STRATEGY: none
   image: roffe/kubectl
-  services:
-    - docker:dind
+#  services:
+#    - docker:dind
   script:
     - kubectl config set-cluster deploy-cluster --server="$K8S_URL" --insecure-skip-tls-verify=true
     - kubectl config set-credentials deployer --token="$K8S_TOKEN"
