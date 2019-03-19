@@ -99,9 +99,9 @@ build:docker:img:
 
 k8s:deploy:prod:
   stage: deploy
-    dependencies: []
-    variables:
-      GIT_STRATEGY: none
+  dependencies: []
+  variables:
+    GIT_STRATEGY: none
   image: roffe/kubectl
 #  services:
 #    - docker:dind
