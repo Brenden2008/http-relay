@@ -12,15 +12,15 @@ kubectl apply -f deployment.yaml
 kubectl expose deployment httprelay-deployment --target-port=8800 --type=NodePort
 
 # LetsEncrypt https://github.com/ahmetb/gke-letsencrypt
-kubectl create serviceaccount -n kube-system tiller
-kubectl create clusterrolebinding tiller-binding \
-    --clusterrole=cluster-admin \
-    --serviceaccount kube-system:tiller
-helm init --wait --service-account tiller
-helm repo update
-helm install --name cert-manager --version v0.5.2 --namespace kube-system stable/cert-manager
-export EMAIL=jonas.jasas@gmail.com
-curl -sSL https://rawgit.com/ahmetb/gke-letsencrypt/master/yaml/letsencrypt-issuer.yaml |     sed -e "s/email: ''/email: $EMAIL/g" |     kubectl apply -f-
+#kubectl create serviceaccount -n kube-system tiller
+#kubectl create clusterrolebinding tiller-binding \
+#    --clusterrole=cluster-admin \
+#    --serviceaccount kube-system:tiller
+#helm init --wait --service-account tiller
+#helm repo update
+#helm install --name cert-manager --version v0.5.2 --namespace kube-system stable/cert-manager
+#export EMAIL=jonas.jasas@gmail.com
+#curl -sSL https://rawgit.com/ahmetb/gke-letsencrypt/master/yaml/letsencrypt-issuer.yaml |     sed -e "s/email: ''/email: $EMAIL/g" |     kubectl apply -f-
 
 kubectl apply -f ingress.yaml
 
