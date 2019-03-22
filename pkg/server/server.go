@@ -42,7 +42,7 @@ func NewServer(args Args) (server *Server, err error) {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.Copy(w, strings.NewReader("v9"))
+		io.Copy(w, strings.NewReader("v10"))
 	})
 
 	syncRep := repository.NewSyncRep(server.stopChan)
