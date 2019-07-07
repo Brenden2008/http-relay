@@ -14,43 +14,43 @@ stages:
 - image
 - deploy
 
-build:download:
-  stage: build
-  extends: .prepare:go
-  artifacts:
-    paths:
-#      - download/
-    - docker/
-
-  script:
-#    - mkdir download
+#build:download:
+#  stage: build
+#  extends: .prepare:go
+#  artifacts:
+#    paths:
+##      - download/
+#    - docker/
 #
-#    - GOOS=linux GOARCH=386 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
-#    - rm -r bin
+#  script:
+##    - mkdir download
+##
+##    - GOOS=linux GOARCH=386 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+##    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
+##    - rm -r bin
+##
+##    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+##    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
+##    - rm -r bin
+##
+##    - GOOS=linux GOARCH=arm go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+##    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
+##    - rm -r bin
+##
+##    - GOOS=linux GOARCH=arm64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+##    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
+##    - rm -r bin
+##
+##    - GOOS=windows GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+##    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
+##    - rm -r bin
+##
+##    - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+##    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
+##    - rm -r bin
 #
-#    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=arm go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=arm64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=windows GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-#    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
-#    - rm -r bin
-
-    - mkdir docker
-    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/...
+#    - mkdir docker
+#    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o docker/${CI_PROJECT_NAME} ./cmd/...
 
 #test:race:
 #  stage: test
