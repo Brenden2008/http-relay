@@ -8,13 +8,14 @@ gcloud container clusters delete httprelay --quiet
 gcloud container clusters create httprelay --zone=europe-west4-c --machine-type=g1-small --num-nodes=1 --cluster-version=1.12.5 --disk-size=10GB
 gcloud container clusters get-credentials httprelay
 
-kubectl apply -f gitlab.yaml
-
-kubectl apply -f deployment.yaml
-kubectl expose deployment httprelay-deployment --target-port=8800 --type=NodePort
-kubectl apply -f ingress.yaml
-
+kubectl create namespace cert-manager
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/cert-manager.yaml --validate=false
-sleep 10s
 kubectl apply -f letsencrypt.yaml
+
+#sleep 10s
+#kubectl apply -f gitlab.yaml
+#kubectl apply -f deployment.yaml
+#kubectl expose deployment httprelay-deployment --target-port=8800 --type=NodePort
+#kubectl apply -f ingress.yaml
+
 
