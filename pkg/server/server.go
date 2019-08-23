@@ -41,8 +41,8 @@ func NewServer(args Args) (server *Server, err error) {
 		server.Listener, err = newUnixListener(args.UnixSocket)
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.Copy(w, strings.NewReader("v14"))
+	http.HandleFunc("/ver", func(w http.ResponseWriter, r *http.Request) {
+		io.Copy(w, strings.NewReader("v15"))
 	})
 
 	syncRep := repository.NewSyncRep(server.stopChan)
