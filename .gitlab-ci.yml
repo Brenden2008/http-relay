@@ -107,7 +107,7 @@ k8s:deploy:prod:
 #    - docker:dind
   script:
   - kubectl config set-cluster deploy-cluster --server="$K8S_URL" --insecure-skip-tls-verify=true
-  - kubectl config set-credentials deployer --token="$K8S_TOKEN"
+  - kubectl config set-credentials deployer --token="$K8S_DEPLOYER_TOKEN"
   - kubectl config set-context deploy-context --cluster=deploy-cluster --user=deployer
   - kubectl config use-context deploy-context
   - kubectl get po
