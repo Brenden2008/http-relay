@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: httprelay-deployment
+  name: httprelay
   labels:
     app: httprelay
 spec:
@@ -19,7 +19,8 @@ spec:
         image: registry.gitlab.com/jonas.jasas/httprelay
         imagePullPolicy: 'Always'
         ports:
-        - containerPort: 8800
+        - name: http
+          containerPort: 8800
 
 ---
 
@@ -28,15 +29,13 @@ kind: Service
 metadata:
   labels:
     app: httprelay
-  name: httprelay-deployment
-  namespace: default
+  name: httprelay
 spec:
-  externalTrafficPolicy: Cluster
-  type: NodePort
-  ports:
-  - port: 8800
   selector:
     app: httprelay
-  sessionAffinity: None
-status:
-  loadBalancer: {}
+  externalTrafficPolicy: Local
+  type: NodePort
+  ports:
+  - name: http
+    targetPort: http
+    port: 30880
