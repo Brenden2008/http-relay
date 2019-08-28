@@ -22,6 +22,11 @@ spec:
         - name: http
           containerPort: 8800
 
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+
 ---
 
 apiVersion: v1
