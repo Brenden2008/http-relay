@@ -18,11 +18,17 @@ spec:
       - name: httprelay
         image: registry.gitlab.com/jonas.jasas/httprelay
         imagePullPolicy: 'Always'
+
         ports:
         - name: http
           containerPort: 8800
 
         livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+
+        readinessProbe:
           httpGet:
             path: /health
             port: http
