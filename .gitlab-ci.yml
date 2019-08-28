@@ -106,4 +106,4 @@ k8s:deploy:prod:
   - kubectl config set-credentials deployer --token="$K8S_DEPLOYER_TOKEN"
   - kubectl config set-context deploy-context --cluster=deploy-cluster --user=deployer
   - kubectl config use-context deploy-context
-  - kubectl set image deployments/httprelay-deployment httprelay=registry.gitlab.com/jonas.jasas/httprelay:$CI_COMMIT_SHA
+  - kubectl set image deployments/httprelay httprelay=registry.gitlab.com/jonas.jasas/httprelay:$CI_COMMIT_SHA
