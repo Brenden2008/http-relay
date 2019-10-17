@@ -10,7 +10,7 @@
 
 stages:
 - build
-#  - test
+- test
 - image
 - deploy
 
@@ -48,17 +48,17 @@ build:download:
     - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
     - rm -r bin
 
-#test:race:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go build --race ./cmd/...
-#
-#test:integration:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go test ./test/... -cover
+test:race:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go build --race ./cmd/...
+
+test:integration:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go test ./test/... -cover
 
 build:docker:img:
   stage: image
