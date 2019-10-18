@@ -8,7 +8,7 @@ Client to client HTTP communication
 - Simple. Secure. Blazing fast.
 
 ## Download
-[Download executables](https://gitlab.com/jonas.jasas/httprelay/-/jobs/artifacts/master/browse/download?job=build:download)
+[Download executables](https://gitlab.com/jonas.jasas/httprelay/-/jobs/artifacts/master/browse/download?job=build:download) (Linux, Mac, Windows)
 
 ## Usage examples
 

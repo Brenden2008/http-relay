@@ -4,6 +4,9 @@ metadata:
   name: httprelay
   annotations:
     kubernetes.io/ingress.global-static-ip-name: httprelay-ip
+    ingress.kubernetes.io/custom-response-headers: |
+    - Access-Control-Allow-Origin: *
+    - Access-Control-Allow-Credentials: true
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     certmanager.k8s.io/acme-http01-edit-in-place: "true"
 
