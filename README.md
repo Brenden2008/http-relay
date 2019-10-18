@@ -22,5 +22,15 @@ Link communication method must be used when there is only one receiver and sende
 Sender's request will be finished when receiver makes the request.
 If receiver makes request prior sender, receiver request will wait till sender makes the request.
 
-<script async src="//jsfiddle.net/jasajona/q6uhLuqf/embed/"></script>
+### Multicast example (one to many)
+Multicast communication method provides one to many data transfers.
+Multicast communication method must be used when there are many receivers and sender don't need to know when or if receivers received it's data.
 
+- Send data: POST https://httprelay.io/mcast/your_secret_channel_id
+- Receive data GET https://httprelay.io/mcast/your_secret_channel_id
+
+Sender's request will finish as soon as all data is transferred to the server.
+If receiver makes request prior sender, receiver request will idle till sender makes the request.
+Each request receiver receives cookie "SeqId" with the sequence number.
+On next request receiver will wait till sender sends new data.
+Cookies must be enabled on receiver side or it will receive same data multiple times and there will be no way to tell when new data is available.
