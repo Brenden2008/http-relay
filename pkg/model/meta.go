@@ -70,6 +70,8 @@ func (m *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string)
 	}
 	expose = append([]string{"X-Real-IP", "X-Real-Port", "Httprelay-Time", "Httprelay-Your-Time", "Httprelay-Method", "Httprelay-Query"}, expose...)
 	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
 func toUnixMilli(t time.Time) string {
