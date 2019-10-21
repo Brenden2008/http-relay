@@ -38,9 +38,8 @@ func (mc *McastCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 
 	closeChan := r.Context().Done()
 
+	yourTime := time.Now()
 	if strings.EqualFold(r.Method, http.MethodGet) {
-		yourTime := time.Now()
-
 		seqId := seqId(r)
 		cache := seqId > -1
 
@@ -56,7 +55,8 @@ func (mc *McastCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 		if seqId, ok := mc.rep.Write(mcastId, data, wSecret(r)); ok {
 			if _, err := data.CopyContent(); err == nil {
 				w.Header().Set("Httprelay-Seqid", strconv.Itoa(seqId))
-				w.Header().Set("Access-Control-Expose-Headers", "Httprelay-Seqid")
+				//w.Header().Set("Access-Control-Expose-Headers", "Httprelay-Seqid")
+				data.Meta.Write(w, yourTime, []string{"Httprelay-Seqid"}, clientIp(r))
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
