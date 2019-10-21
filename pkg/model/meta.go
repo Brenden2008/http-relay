@@ -54,7 +54,7 @@ func (m *Meta) Memory() int64 {
 	return int64(structSize) + int64(stringSize)
 }
 
-func (m *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string) {
+func (m *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string, reqSrcIp string) {
 	w.Header().Set("Content-Type", m.ContentType)
 	if m.ContentLength > -1 {
 		// If length is known is better to set it or "Transfer-Encoding: chunked" will be used
@@ -70,8 +70,7 @@ func (m *Meta) Write(w http.ResponseWriter, yourTime time.Time, expose []string)
 	}
 	expose = append([]string{"X-Real-IP", "X-Real-Port", "Httprelay-Time", "Httprelay-Your-Time", "Httprelay-Method", "Httprelay-Query"}, expose...)
 	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Origin", reqSrcIp)
 }
 
 func toUnixMilli(t time.Time) string {

@@ -78,8 +78,9 @@ func writeHeaders(w http.ResponseWriter, r *http.Request, seqId int, data *model
 	nextSeqid := seqId + 1
 	w.Header().Set("Set-Cookie", fmt.Sprintf("%s=%d; Path=%s", seqIdParamName, nextSeqid, r.URL.Path))
 	w.Header().Set("Httprelay-Seqid", strconv.Itoa(seqId))
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	data.Meta.Write(w, yourTime, []string{"Httprelay-Seqid"})
+	data.Meta.Write(w, yourTime, []string{"Httprelay-Seqid"}, clientIp(r))
 }
 
 func seqId(r *http.Request) (seqId int) {

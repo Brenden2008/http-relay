@@ -19,8 +19,8 @@ func NewPtpData(r *http.Request) *PtpData {
 	}
 }
 
-func (pd *PtpData) Write(w http.ResponseWriter, yourTime time.Time, expose []string) (err error) {
-	pd.Meta.Write(w, yourTime, expose)
+func (pd *PtpData) Write(w http.ResponseWriter, yourTime time.Time, expose []string, reqSrcIp string) (err error) {
+	pd.Meta.Write(w, yourTime, expose, reqSrcIp)
 	_, err = io.Copy(w, pd.Content)
 	return
 }
