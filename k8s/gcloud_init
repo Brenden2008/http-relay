@@ -12,9 +12,10 @@ kubectl create namespace cert-manager
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.11.0/cert-manager.yaml --validate=false
 kubectl apply -f letsencrypt.yaml
 
-#sleep 10s
-#kubectl apply -f deployment.yaml
+sleep 10s
+kubectl apply -f deployer-account.yaml
+kubectl apply -f deployment.yaml
 #kubectl expose deployment httprelay-deployment --target-port=8800 --type=NodePort
-#kubectl apply -f ingress.yaml
+kubectl apply -f ingress.yaml
 
 
