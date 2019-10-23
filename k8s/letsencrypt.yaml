@@ -6,10 +6,10 @@ metadata:
 spec:
   acme:
     email: jonas.jasas@gmail.com
-    server: https://acme-v02.api.letsencrypt.org/directory
-
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: demo-httprelay-io-key
+
     http01: {}
 
 ---
@@ -19,19 +19,23 @@ kind: Certificate
 metadata:
   name: demo-httprelay-io
   namespace: default
+
 spec:
   secretName: demo-httprelay-io-crt
   renewBefore: 360h # 15d
   commonName: demo.httprelay.io
   dnsNames:
   - demo.httprelay.io
+
   issuerRef:
     name: letsencrypt-prod
     kind: Issuer
+
   acme:
     config:
     - http01:
         ingressClass: ingress-gce
         kubernetes.io/ingress.global-static-ip-name: httprelay-ip
+
       domains:
       - demo.httprelay.io
