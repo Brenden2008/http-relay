@@ -3,9 +3,9 @@ kind: Ingress
 metadata:
   name: httprelay
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: httprelay-ip
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    cert-manager.io/acme-http01-edit-in-place: "true"
+    kubernetes.io/ingress.global-static-ip-name: "httprelay-ip"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    acme.cert-manager.io/http01-edit-in-place: "true"
 
 spec:
   backend:
