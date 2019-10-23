@@ -25,5 +25,5 @@ func wSecret(r *http.Request) string {
 //}
 
 func reqOrigin(r *http.Request) string {
-	return r.Header.Get("X-Forwarded-For")
+	return r.Header.Get("Origin")
 }
