@@ -56,7 +56,9 @@ func (m *Meta) Memory() int64 {
 
 func (m *Meta) WriteHeaders(w http.ResponseWriter, yourTime time.Time, expose []string, content bool, origin string) {
 	if content {
-		w.Header().Set("Content-Type", m.ContentType)
+		if m.ContentType != "" {
+			w.Header().Set("Content-Type", m.ContentType)
+		}
 		if m.ContentLength > -1 {
 			// If length is known is better to set it or "Transfer-Encoding: chunked" will be used
 			w.Header().Set("Content-Length", strconv.FormatInt(m.ContentLength, 10))
