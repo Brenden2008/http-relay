@@ -20,7 +20,7 @@ func NewPtpData(r *http.Request) *PtpData {
 }
 
 func (pd *PtpData) Write(w http.ResponseWriter, yourTime time.Time, expose []string, origin string) (err error) {
-	pd.Meta.Write(w, yourTime, expose, origin)
+	pd.Meta.WriteHeaders(w, yourTime, expose, true, origin)
 	_, err = io.Copy(w, pd.Content)
 	return
 }

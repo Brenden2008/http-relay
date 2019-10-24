@@ -56,7 +56,7 @@ func (lc *LinkCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 		linkData := model.NewLinkData(r)
 		if meta, ok, auth := lc.rep.Write(id, linkData, wSecret(r), r.Context().Done()); ok && auth {
 			<-linkData.Data.Content.Buff()
-			meta.Write(w, yourTime, nil, reqOrigin(r))
+			meta.WriteHeaders(w, yourTime, nil, false, reqOrigin(r))
 		} else {
 			if auth {
 				w.WriteHeader(http.StatusServiceUnavailable)
