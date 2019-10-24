@@ -69,13 +69,8 @@ build:docker:img:
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
-#  artifacts:
-#    paths:
-#    - docker/
   script:
-#  - echo "nobody:x:65534:65534:Nobody:/:" > docker/passwd
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-#  - docker pull $CONTAINER_IMAGE:latest || true
   - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE .
   - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
   - docker push $CONTAINER_IMAGE
