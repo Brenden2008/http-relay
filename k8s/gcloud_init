@@ -1,12 +1,12 @@
 #!/bin/bash
 set -x
 
-gcloud container clusters delete httprelay --quiet --zone=europe-west4-c
+gcloud container clusters delete httprelay --quiet --zone=europe-west4 --project http-relay-1490338352158
 
 # Create static IP in GCloud
 #gcloud compute addresses create httprelay-ip --global
-gcloud container clusters create httprelay --zone=europe-west4-c --machine-type=g1-small --num-nodes=1 --cluster-version=1.14.6 --disk-size=10GB
-gcloud container clusters get-credentials httprelay --zone=europe-west4-c
+gcloud container clusters create httprelay --zone=europe-west4 --machine-type=g1-small --num-nodes=1 --cluster-version=1.14.6 --disk-size=10GB --project http-relay-1490338352158
+gcloud beta container clusters get-credentials httprelay --region europe-west4 --project http-relay-1490338352158
 
 kubectl create namespace cert-manager
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.11.0/cert-manager.yaml --validate=false
