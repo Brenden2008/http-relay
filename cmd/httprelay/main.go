@@ -17,7 +17,7 @@ var args struct {
 func init() {
 	flag.StringVar(&args.serverArgs.UnixSocket, "u", "", "Bind Unix socket path")
 	flag.StringVar(&args.serverArgs.Addr, "a", "", "Bind address")
-	flag.IntVar(&args.serverArgs.Port, "p", 8800, "Bind port")
+	flag.IntVar(&args.serverArgs.Port, "p", 8080, "Bind port")
 	flag.Parse()
 }
 
