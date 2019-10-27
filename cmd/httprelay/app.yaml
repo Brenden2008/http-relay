@@ -1,1 +1,17 @@
 runtime: go112
+instance_class: B1
+
+manual_scaling:
+  instances: 1
+
+liveness_check:
+  path: "/health"
+  check_interval_sec: 5
+  timeout_sec: 1
+  failure_threshold: 1
+  initial_delay_sec: 10
+
+health_check:
+  enable_health_check: true
+  check_interval_sec: 5
+  timeout_sec: 1

@@ -15,7 +15,7 @@ kubectl apply -f letsencrypt.yaml
 sleep 10s
 kubectl apply -f deployer-account.yaml
 kubectl apply -f deployment.yaml
-#kubectl expose deployment httprelay-deployment --target-port=8800 --type=NodePort
+#kubectl expose deployment httprelay-deployment --target-port=8080 --type=NodePort
 kubectl apply -f ingress.yaml
 
 

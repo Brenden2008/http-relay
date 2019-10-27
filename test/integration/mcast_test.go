@@ -7,7 +7,6 @@ import (
 	"gitlab.com/jonas.jasas/httprelay/pkg/repository"
 	"gitlab.com/jonas.jasas/rwmock"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -73,5 +72,5 @@ func TestMcast(t *testing.T) {
 	}
 
 	wg.Wait()
-	log.Print(mcastRep.Size(), mcastRep.DataCount())
+	fmt.Print(mcastRep.Size(), mcastRep.DataCount())
 }

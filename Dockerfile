@@ -12,5 +12,5 @@ FROM scratch
 COPY --from=build /passwd /etc/passwd
 COPY --from=build /httprelay .
 USER nobody
-EXPOSE 8800
+EXPOSE 8080
 ENTRYPOINT ["/httprelay"]

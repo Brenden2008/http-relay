@@ -18,7 +18,7 @@ Please use your own deployments as https://demo.httprelay.io for demonstration p
 ### Docker
 - Latest image: `registry.gitlab.com/jonas.jasas/httprelay`
 - [Image list](https://gitlab.com/jonas.jasas/httprelay/container_registry)
-- Run: `docker run -p 8800:8800 registry.gitlab.com/jonas.jasas/httprelay`
+- Run: `docker run -p 8080:8080 registry.gitlab.com/jonas.jasas/httprelay`
 
 ### Build
 Install the package to your [$GOPATH](https://github.com/golang/go/wiki/GOPATH "GOPATH") with the [go tool](https://golang.org/cmd/go/ "go command") from shell:
@@ -33,7 +33,7 @@ Make sure [Git is installed](https://git-scm.com/downloads) on your machine and 
 
 ### Test installation
 
-Go to http://localhost:8800/health should display version number. 
+Go to http://localhost:8080/health should display version number. 
 
 ## Usage examples
 
@@ -74,6 +74,6 @@ Cookies must be enabled on receiver side or it will receive same data multiple t
 
 ## Command line arguments
 - **-a** Bind to IP address (default 0.0.0.0)
-- **-p** Bind to port (default 8800)
+- **-p** Bind to port (default 8080)
 - **-u** Bind to Unix socket path
 - **-h** Print help
