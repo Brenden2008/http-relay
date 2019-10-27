@@ -101,7 +101,7 @@ k8s:deploy:prod:
     - mkdir -p $NS_DIR
     - ln -s $CI_PROJECT_DIR $PROJ_DIR
     - cd $PROJ_DIR
-    - export GOPATH $PROJ_DIR/pkg
+    - export GOPATH=$PROJ_DIR/pkg
     - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
     - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
     - gcloud app deploy $PROJ_DIR/cmd/httprelay/app.yaml --quiet
