@@ -1,9 +1,9 @@
 package main
 
 import (
+	"../../pkg/server"
 	"flag"
 	"fmt"
-	"../../pkg/server"
 	"io"
 	"net"
 	"net/http"

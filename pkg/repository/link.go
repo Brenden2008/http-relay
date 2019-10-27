@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"gitlab.com/jonas.jasas/httprelay/pkg/model"
+	"../model"
 	"net/http"
 	"sync"
 )
