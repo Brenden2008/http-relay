@@ -1,9 +1,9 @@
 package main
 
 import (
+	"../../pkg/server"
 	"flag"
 	"fmt"
-	"gitlab.com/jonas.jasas/httprelay/pkg/server"
 	"io"
 	"net"
 	"net/http"
