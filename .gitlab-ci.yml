@@ -96,7 +96,9 @@ gae:deploy:prod:
 #    GIT_STRATEGY: none
 #    CLOUDSDK_PYTHON_SITEPACKAGES: 1
   script:
-    - snap install google-cloud-sdk --classic
+    - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+    - apt-get update && apt-get install google-cloud-sdk
     - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
     - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
     - gcloud app deploy $CI_PROJECT_DIR/cmd/httprelay/app.yaml --quiet
