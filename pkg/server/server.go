@@ -1,8 +1,8 @@
 package server
 
 import (
-	"../controller"
-	"../repository"
+	"gitlab.com/jonas.jasas/httprelay/pkg/controller"
+	"gitlab.com/jonas.jasas/httprelay/pkg/repository"
 	"net"
 	"net/http"
 	"time"

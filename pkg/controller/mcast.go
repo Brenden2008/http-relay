@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"../model"
 	"fmt"
+	"gitlab.com/jonas.jasas/httprelay/pkg/model"
 	"io"
 	"net/http"
 	"strconv"

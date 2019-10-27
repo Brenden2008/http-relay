@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"../model"
+	"gitlab.com/jonas.jasas/httprelay/pkg/model"
 	"net/http"
 	"strings"
 	"time"
