@@ -90,19 +90,13 @@ stages:
 
 gae:deploy:prod:
   stage: deploy
-  dependencies: []
-  image: google/cloud-sdk
+  extends: .prepare:go
+#  image: google/cloud-sdk
 #  variables:
 #    GIT_STRATEGY: none
 #    CLOUDSDK_PYTHON_SITEPACKAGES: 1
   script:
-#    - export NS_DIR=$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
-#    - export PROJ_DIR=$NS_DIR/$CI_PROJECT_NAME
-#    - mkdir -p $NS_DIR
-#    - ln -s $CI_PROJECT_DIR $PROJ_DIR
-#    - cd $PROJ_DIR
-    - export GOPATH=$CI_PROJECT_DIR/pkg
+    - snap install google-cloud-sdk --classic
     - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
     - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
-    - cd $CI_PROJECT_DIR/cmd/httprelay
     - gcloud app deploy $CI_PROJECT_DIR/cmd/httprelay/app.yaml --quiet
