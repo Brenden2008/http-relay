@@ -96,6 +96,7 @@ k8s:deploy:prod:
     GIT_STRATEGY: none
     CLOUDSDK_PYTHON_SITEPACKAGES: 1
   script:
-    - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE --project=http-relay-1490338352158
+    - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
+    - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
 #    - cd $NS_DIR/$CI_PROJECT_NAME/cmd/httprelay
     - gcloud app deploy --image-url=registry.gitlab.com/jonas.jasas/httprelay:$CI_COMMIT_SHA
