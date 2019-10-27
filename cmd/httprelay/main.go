@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gitlab.com/jonas.jasas/httprelay/pkg/server"
+	"../../pkg/server"
 	"io"
 	"net"
 	"net/http"
