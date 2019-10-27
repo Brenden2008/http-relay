@@ -94,7 +94,7 @@ k8s:deploy:prod:
   image: google/cloud-sdk:alpine
   variables:
     GIT_STRATEGY: none
-    CLOUDSDK_PYTHON_SITEPACKAGES: 1
+#    CLOUDSDK_PYTHON_SITEPACKAGES: 1
   script:
     - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
     - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
