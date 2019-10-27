@@ -98,4 +98,4 @@ k8s:deploy:prod:
   script:
     - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
     - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
-    - gcloud app deploy $NS_DIR/$CI_PROJECT_NAME/cmd/httprelay/app.yaml
+    - gcloud app deploy $CI_PROJECT_DIR/cmd/httprelay/app.yaml
