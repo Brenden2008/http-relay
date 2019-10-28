@@ -10,8 +10,3 @@ liveness_check:
   timeout_sec: 1
   failure_threshold: 1
   initial_delay_sec: 10
-
-health_check:
-  enable_health_check: true
-  check_interval_sec: 5
-  timeout_sec: 1
