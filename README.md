@@ -1,9 +1,9 @@
 # HTTP Relay
 Client to client HTTP communication
 
-**IMPORTANT!!!**
-_Httprelay is moving from SaS to OSS.
-Service that is accessible at https://httprelay.io is moved to https://demo.httprelay.io.
+***IMPORTANT!!!***
+_Due to increased service usage and user requests Httprelay is moving from SaS to OSS.
+Service that is accessible at https://httprelay.io is **going to be moved on 2019-10-10** to https://demo.httprelay.io.
 Please use your own deployments as https://demo.httprelay.io for demonstration purpose only!_ 
 
 ## Features
@@ -39,7 +39,7 @@ Go to http://localhost:8080/health should display version number.
 
 ### Sync example (p2p)
 
-**[Example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
+**[Example](https://jsfiddle.net/jasajona/y35rLnd9/)**
 
 ### Link example (p2p)
 Link communication method provides peer to peer synchronous data transfers.
@@ -52,7 +52,7 @@ Link communication method must be used when there is only one receiver and sende
 Sender's request will be finished when receiver makes the request.
 If receiver makes request prior sender, receiver request will wait till sender makes the request.
 
-**[Example](https://jsfiddle.net/jasajona/y35rLnd9/)**
+**[Example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
 
 ### Multicast example (one to many)
 Multicast communication method provides one to many data transfers.

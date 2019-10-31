@@ -9,71 +9,71 @@
   - go get ./...
 
 stages:
-#- build
-#- test
-#- image
-- deploy
+- build
+- test
+- image
+#- deploy
 
-#build:download:
-#  stage: build
-#  extends: .prepare:go
-#  artifacts:
-#    paths:
-#    - download/
-#
-#  script:
-#    - mkdir download
-#
-#    - GOOS=linux GOARCH=386 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=arm go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=arm64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=windows GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-#    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
-#    - rm -r bin
-#
-#test:race:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go build --race ./cmd/...
-#
-#test:integration:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go test ./test/... -cover
+build:download:
+  stage: build
+  extends: .prepare:go
+  artifacts:
+    paths:
+    - download/
 
-#build:docker:img:
-#  stage: image
-#  image: docker:stable
-#  services:
-#  - docker:dind
-#  variables:
-#    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_DRIVER: overlay2
-#  script:
-#  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-#  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE .
-#  - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
-#  - docker push $CONTAINER_IMAGE
+  script:
+    - mkdir download
+
+    - GOOS=linux GOARCH=386 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=arm go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=arm64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=windows GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=darwin GOARCH=amd64 go build -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
+    - rm -r bin
+
+test:race:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go build --race ./cmd/...
+
+test:integration:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go test ./test/... -cover
+
+build:docker:img:
+  stage: image
+  image: docker:stable
+  services:
+  - docker:dind
+  variables:
+    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+  script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE .
+  - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+  - docker push $CONTAINER_IMAGE
 
 #deploy:aws:
 #  stage: deploy
@@ -88,13 +88,13 @@ stages:
 #  script:
 #    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
 
-gae:deploy:prod:
-  stage: deploy
-  extends: .prepare:go
-  script:
-    - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-    - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-    - apt-get update && apt-get install google-cloud-sdk google-cloud-sdk-app-engine-go --yes
-    - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
-    - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
-    - gcloud app deploy $CI_PROJECT_DIR/cmd/httprelay/app.yaml --quiet
+#gae:deploy:prod:
+#  stage: deploy
+#  extends: .prepare:go
+#  script:
+#    - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+#    - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+#    - apt-get update && apt-get install google-cloud-sdk google-cloud-sdk-app-engine-go --yes
+#    - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
+#    - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
+#    - gcloud app deploy $CI_PROJECT_DIR/cmd/httprelay/app.yaml --quiet
