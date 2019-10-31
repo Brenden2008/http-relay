@@ -15,9 +15,10 @@ import (
 )
 
 var args struct {
-	Addr   string
-	Port   int
-	Socket string
+	Addr     string
+	Port     int
+	Socket   string
+	StopPath string
 }
 
 func init() {
@@ -29,6 +30,7 @@ func init() {
 	flag.StringVar(&args.Addr, "a", "", "Bind address")
 	flag.IntVar(&args.Port, "p", port, "Bind port")
 	flag.StringVar(&args.Socket, "u", "", "Bind Unix socket path")
+	flag.StringVar(&args.StopPath, "s", "", "Service stop URL path")
 	flag.Parse()
 }
 
@@ -49,16 +51,20 @@ func main() {
 	if listener, err := listener(); err == nil {
 		server := server.NewServer(listener)
 		errChan := server.Start()
+		fmt.Println("Server is listening on " + server.Addr().String())
 
 		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("health req")
 			io.Copy(w, strings.NewReader("v22"))
 		})
 
-		fmt.Println("Server is listening on " + server.Addr().String())
-
 		intChan := make(chan os.Signal, 1)
 		signal.Notify(intChan, os.Interrupt)
+		if args.StopPath != "" {
+			http.HandleFunc(args.StopPath, func(w http.ResponseWriter, r *http.Request) {
+				close(intChan)
+			})
+		}
 
 		select {
 		case <-intChan:
