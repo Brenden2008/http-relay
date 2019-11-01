@@ -1,8 +1,3 @@
-.prepare:ver:
-  before_script:
-    - export COMMIT_TIME=`git show -s --format=%ci`
-    - export VERSION=`date --date="$COMMIT_TIME" "+%Y%m%d-%H%M"`
-
 .prepare:go:
   image: golang
   before_script:
@@ -14,10 +9,20 @@
     - go get ./...
 
 stages:
+- version
 #- build
 #- test
 - image
 #- deploy
+
+prepare:ver:
+  stage: version
+  image: alpine/git
+  artifacts:
+    paths:
+    - ver/
+  script:
+    - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
 
 #build:download:
 #  stage: build
@@ -69,6 +74,9 @@ build:docker:img:
   stage: image
   image: docker:stable
   extends: .prepare:ver
+  artifacts:
+    paths:
+      - ver/
   services:
   - docker:dind
   variables:
@@ -76,9 +84,11 @@ build:docker:img:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
   script:
+  - export VERSION=`cat ver/ver`
+  - echo $VERSION
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE .
-  - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+  - docker build --tag $CONTAINER_IMAGE:$VERSION --tag $CONTAINER_IMAGE .
+  - docker push $CONTAINER_IMAGE:$VERSION
   - docker push $CONTAINER_IMAGE
 
 #deploy:aws:
