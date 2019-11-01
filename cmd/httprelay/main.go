@@ -48,7 +48,7 @@ func listener() (net.Listener, error) {
 
 func main() {
 	fmt.Println("========================================================================")
-	fmt.Println("Starting Httprelay version: ", Version)
+	fmt.Println("Starting Httprelay version:", Version)
 
 	if listener, err := listener(); err == nil {
 		server := server.NewServer(listener)

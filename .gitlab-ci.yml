@@ -11,8 +11,8 @@
 
 stages:
 - build
-#- test
-#- image
+- test
+- image
 #- deploy
 
 build:download:
@@ -49,32 +49,32 @@ build:download:
     - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
     - rm -r bin
 
-#test:race:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go build --race ./cmd/...
-#
-#test:integration:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go test ./test/... -cover
-#
-#build:docker:img:
-#  stage: image
-#  image: docker:stable
-#  services:
-#  - docker:dind
-#  variables:
-#    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_DRIVER: overlay2
-#  script:
-#  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-#  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE .
-#  - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
-#  - docker push $CONTAINER_IMAGE
+test:race:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go build --race ./cmd/...
+
+test:integration:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go test ./test/... -cover
+
+build:docker:img:
+  stage: image
+  image: docker:stable
+  services:
+  - docker:dind
+  variables:
+    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+  script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE .
+  - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+  - docker push $CONTAINER_IMAGE
 
 #deploy:aws:
 #  stage: deploy
