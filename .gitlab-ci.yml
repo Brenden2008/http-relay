@@ -35,7 +35,9 @@ prepare:ver:
 
 build:download:
   stage: build
-  extends: ['.prepare:go', '.prepare:ver']
+  extends:
+  - .prepare:go
+  - .prepare:ver
   artifacts:
     paths:
     - download/
