@@ -17,7 +17,7 @@ stages:
 
 prepare:ver:
   stage: version
-  image: alpine/git
+  image: golang
   artifacts:
     paths:
     - ver/
