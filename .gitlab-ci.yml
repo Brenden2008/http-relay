@@ -22,7 +22,7 @@ prepare:ver:
     paths:
     - ver/
   script:
-    - git show -s --format=%ci
+    - mkdir ver
     - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
 
 #build:download:
