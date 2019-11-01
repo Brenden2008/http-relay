@@ -8,6 +8,14 @@
     - cd $PROJ_DIR
     - go get ./...
 
+.prepare:ver:
+  artifacts:
+    paths:
+      - ver/
+
+  before_script:
+    - export VERSION=`cat ver/ver`
+
 stages:
 - version
 #- build
@@ -73,10 +81,8 @@ prepare:ver:
 #
 build:docker:img:
   stage: image
+  extends: .prepare:ver
   image: docker:stable
-  artifacts:
-    paths:
-      - ver/
   services:
   - docker:dind
   variables:
@@ -84,8 +90,6 @@ build:docker:img:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
   script:
-  - export VERSION=`cat ver/ver`
-  - echo $VERSION
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   - docker build --tag $CONTAINER_IMAGE:$VERSION --tag $CONTAINER_IMAGE .
   - docker push $CONTAINER_IMAGE:$VERSION
