@@ -8,42 +8,28 @@
     - cd $PROJ_DIR
     - go get ./...
 
-.prepare:ver:
-  artifacts:
-    paths:
-      - ver/
-
-  before_script:
-    - export VERSION=`cat ver/ver`
-
 stages:
-- version
 - build
 - test
 - image
 #- deploy
-
-prepare:ver:
-  stage: version
-  image: golang
-  artifacts:
-    paths:
-    - ver/
-  script:
-    - mkdir ver
-    - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
 
 build:download:
   stage: build
   extends:
   - .prepare:go
   - .prepare:ver
+
   artifacts:
     paths:
+    - ver/
     - download/
 
   script:
-    - mkdir download
+    - mkdir download ver
+
+    - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
+    - export VERSION=`cat ver/ver`
 
     - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_linux_386.tar.gz -C bin .
@@ -85,6 +71,9 @@ build:docker:img:
   stage: image
   extends: .prepare:ver
   image: docker:stable
+  artifacts:
+    paths:
+      - ver/
   services:
   - docker:dind
   variables:
@@ -92,6 +81,7 @@ build:docker:img:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
   script:
+  - export VERSION=`cat ver/ver`
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   - docker build --tag $CONTAINER_IMAGE:$VERSION --tag $CONTAINER_IMAGE .
   - docker push $CONTAINER_IMAGE:$VERSION
