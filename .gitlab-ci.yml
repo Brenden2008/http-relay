@@ -26,8 +26,7 @@ build:download:
   script:
     - mkdir download
 
-    - echo $BUILD_CMD
-    - GOOS=linux GOARCH=386 bash -c $BUILD_CMD
+    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION -X main.Commit=$CI_COMMIT_SHORT_SHA" -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_linux_386.tar.gz -C bin .
     - rm -r bin
 
