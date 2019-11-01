@@ -26,7 +26,8 @@ build:download:
   script:
     - mkdir download
 
-    - GOOS=linux GOARCH=386 build
+#    - GOOS=linux GOARCH=386 build
+    - build
     - tar -czf download/httprelay_linux_386.tar.gz -C bin .
     - rm -r bin
 
