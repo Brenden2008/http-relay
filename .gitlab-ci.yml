@@ -2,6 +2,7 @@
   image: golang
   before_script:
   - export VERSION=`date --utc "+%Y%m%d-%H%M"`
+  - export BUILD_CMD='go build -ldflags "-X main.Version=$VERSION -X main.Commit=$CI_COMMIT_SHORT_SHA" -o bin/${CI_PROJECT_NAME} ./cmd/...'
   - export NS_DIR=$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
   - export PROJ_DIR=$NS_DIR/$CI_PROJECT_NAME
   - mkdir -p $NS_DIR
@@ -25,9 +26,7 @@ build:download:
   script:
     - mkdir download
 
-    - alias build='go build -ldflags "-X main.Version=$VERSION -X main.Commit=$CI_COMMIT_SHORT_SHA" -o bin/${CI_PROJECT_NAME} ./cmd/...'
-#    - GOOS=linux GOARCH=386 build
-    - build
+    - GOOS=linux GOARCH=386 bash -c $BUILD_CMD
     - tar -czf download/httprelay_linux_386.tar.gz -C bin .
     - rm -r bin
 
