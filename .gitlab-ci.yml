@@ -31,27 +31,27 @@ build:download:
     - export VERSION=`cat ver/ver`
 
     - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
+    - tar -czf download/httprelay_linux_386_$VERSION.tar.gz -C bin .
     - rm -r bin
 
     - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
+    - tar -czf download/httprelay_linux_amd64_$VERSION.tar.gz -C bin .
     - rm -r bin
 
     - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
+    - tar -czf download/httprelay_linux_arm_$VERSION.tar.gz -C bin .
     - rm -r bin
 
     - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
+    - tar -czf download/httprelay_linux_arm64_$VERSION.tar.gz -C bin .
     - rm -r bin
 
     - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
+    - tar -czf download/httprelay_windows_arm64_$VERSION.tar.gz -C bin .
     - rm -r bin
 
     - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
+    - tar -czf download/httprelay_macosx_arm64_$VERSION.tar.gz -C bin .
     - rm -r bin
 
 test:race:
