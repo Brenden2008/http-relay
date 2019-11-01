@@ -1,69 +1,74 @@
+.prepare:ver:
+  before_script:
+    - export COMMIT_TIME=`git show -s --format=%ci`
+    - export VERSION=`date --date="$COMMIT_TIME" "+%Y%m%d-%H%M"`
+
 .prepare:go:
   image: golang
   before_script:
-  - export VERSION=`date --utc "+%Y%m%d-%H%M"`
-  - export NS_DIR=$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
-  - export PROJ_DIR=$NS_DIR/$CI_PROJECT_NAME
-  - mkdir -p $NS_DIR
-  - ln -s $CI_PROJECT_DIR $PROJ_DIR
-  - cd $PROJ_DIR
-  - go get ./...
+    - export NS_DIR=$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
+    - export PROJ_DIR=$NS_DIR/$CI_PROJECT_NAME
+    - mkdir -p $NS_DIR
+    - ln -s $CI_PROJECT_DIR $PROJ_DIR
+    - cd $PROJ_DIR
+    - go get ./...
 
 stages:
-- build
-- test
+#- build
+#- test
 - image
 #- deploy
 
-build:download:
-  stage: build
-  extends: .prepare:go
-  artifacts:
-    paths:
-    - download/
-
-  script:
-    - mkdir download
-
-    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
-    - rm -r bin
-
-test:race:
-  stage: test
-  extends: .prepare:go
-  script:
-    - go build --race ./cmd/...
-
-test:integration:
-  stage: test
-  extends: .prepare:go
-  script:
-    - go test ./test/... -cover
-
+#build:download:
+#  stage: build
+#  extends: .prepare:go
+#  artifacts:
+#    paths:
+#    - download/
+#
+#  script:
+#    - mkdir download
+#
+#    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_386.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_amd64.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm64.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+#    - tar -czf download/httprelay_windows_arm64.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_macosx_arm64.tar.gz -C bin .
+#    - rm -r bin
+#
+#test:race:
+#  stage: test
+#  extends: .prepare:go
+#  script:
+#    - go build --race ./cmd/...
+#
+#test:integration:
+#  stage: test
+#  extends: .prepare:go
+#  script:
+#    - go test ./test/... -cover
+#
 build:docker:img:
   stage: image
   image: docker:stable
+  extends: .prepare:ver
   services:
   - docker:dind
   variables:
