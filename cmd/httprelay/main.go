@@ -21,6 +21,9 @@ var args struct {
 	StopPath string
 }
 
+var Version string
+var Commit string
+
 func init() {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
@@ -46,7 +49,7 @@ func listener() (net.Listener, error) {
 
 func main() {
 	fmt.Println("========================================================================")
-	fmt.Println("Starting httprelay...")
+	fmt.Println("Starting Httprelay ", Version, " ", Commit)
 
 	if listener, err := listener(); err == nil {
 		server := server.NewServer(listener)
@@ -55,7 +58,7 @@ func main() {
 
 		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("health req")
-			io.Copy(w, strings.NewReader("v22"))
+			io.Copy(w, strings.NewReader(Version+"\n"+Commit))
 		})
 
 		intChan := make(chan os.Signal, 1)

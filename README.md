@@ -35,42 +35,118 @@ Make sure [Git is installed](https://git-scm.com/downloads) on your machine and 
 
 Go to http://localhost:8080/health should display version number. 
 
-## Usage examples
+## Communication methods
 
-### Sync example (p2p)
+### Sync (Alice <-> Bob)
+Sync communication method provides peer to peer synchronous data exchange.
+Two requests can exchange data on any HTTP method.
+
+- Alice: `GET https://demo.httprelay.io/sync/your_secret_channel_id?msg=Hello-Bob`
+- Bob: `GET https://demo.httprelay.io/sync/your_secret_channel_id?msg=Hello-Alice`
+
+URL query data is placed in `httprelay-query` response header field.
 
 **[Example](https://jsfiddle.net/jasajona/y35rLnd9/)**
 
-### Link example (p2p)
-Link communication method provides peer to peer synchronous data transfers.
-Data transfer is one directional, implements producer -> consumer pattern.  
-Link communication method must be used when there is only one receiver and sender must know when receiver received data.
 
-- Send data: `POST https://demo.httprelay.io/link/your_secret_channel_id`
-- Receive data `GET https://demo.httprelay.io/link/your_secret_channel_id`
+If the method supports content transfer (e.g. POST, PUT etc.) data is going to be received as a response body by the counterpart.
+```shell script
+curl -v https://demo.httprelay.io/sync/your_secret_channel_id?msg=I-love-you-Bob    
+...
+> GET /sync/your_secret_channel_id?msg=I-love-you-Bob HTTP/2
+> Host: demo.httprelay.io
+> User-Agent: curl/7.58.0
+> Accept: */*
+...
+< HTTP/2 200 
+< access-control-expose-headers: X-Real-IP, X-Real-Port, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query
+< content-type: text/plain
+< httprelay-method: POST
+< httprelay-time: 1572596282762
+< httprelay-your-time: 1572596271247
+< x-real-ip: 1.2.3.4
+< x-real-port: 31153
+< content-length: 16
+< 
+I love you Alice
+```
 
-Sender's request will be finished when receiver makes the request.
-If receiver makes request prior sender, receiver request will wait till sender makes the request.
+```shell script
+curl -X POST -v -H "Content-Type: text/plain" --data "I love you Alice" https://demo.httprelay.io/sync/your_secret_channel_id
+...
+> POST /sync/your_secret_channel_id HTTP/2
+> Host: demo.httprelay.io
+> User-Agent: curl/7.58.0
+> Accept: */*
+> Content-Type: text/plain
+> Content-Length: 16
+... 
+< HTTP/2 200 
+< access-control-expose-headers: X-Real-IP, X-Real-Port, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query
+< httprelay-method: GET
+< httprelay-query: msg=I-love-you-Bob
+< httprelay-time: 1572596271247
+< httprelay-your-time: 1572596282762
+< x-real-ip: 1.2.3.4
+< x-real-port: 31152
+< content-type: text/html
+< content-length: 0
+< 
+```
+
+### Link (Alice -> Bob)
+Link communication method provides peer to peer synchronous one directional data transfers.
+Link communication method implements producer -> consumer pattern.
+Producer must use `POST` method, consumer must use `GET` method.  
+
+- Producer: `POST https://demo.httprelay.io/link/your_secret_channel_id`
+- Consumer: `GET https://demo.httprelay.io/link/your_secret_channel_id`
+
+Producer's request will be finished when consumer makes the request.
+If consumer makes request prior producer, receiver request will wait till producer makes the request.
 
 **[Example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
 
-### Multicast example (one to many)
-Multicast communication method provides one to many data transfers.
-Multicast communication method must be used when there are many receivers and sender don't need to know when or if receivers received it's data.
+### Mcast (Alice -> Bob, Joe)
+Mcast communication method provides one to many buffered and asynchronous data transfers.
+Mcast communication method must be used when there are multiple consumers and producer don't need to know when or if receivers received it's data.
 
-- Send data: `POST https://httprelay.io/mcast/your_secret_channel_id`
-- Receive data `GET https://httprelay.io/mcast/your_secret_channel_id`
+- Producer (Alice): `POST https://httprelay.io/mcast/your_secret_channel_id`
+- Consumer (Bob): `GET https://httprelay.io/mcast/your_secret_channel_id`
+- Consumer (Joe): `GET https://httprelay.io/mcast/your_secret_channel_id`
 
-Sender's request will finish as soon as all data is transferred to the server.
-If receiver makes request prior sender, receiver request will idle till sender makes the request.
-Each request receiver receives cookie "SeqId" with the sequence number.
-On next request receiver will wait till sender sends new data.
-Cookies must be enabled on receiver side or it will receive same data multiple times and there will be no way to tell when new data is available.
+Producers's request will finish as soon as all data is transferred to the server.
+Currently data is buffered in memory for 20 minutes (next Httprelay versions are going to support more data storage options).
+If consumer makes request prior producer, consumer request will wait till producer makes the request.
+Each producer request receives `httprelay-query` header field with the currently sent data sequence number.
+Each consumer request receives `httprelay-query` header field with the currently received data sequence number and cookie `SeqId` with the next sequence number.
+Cookies must be enabled or `SeqId` query parameter must be provided in consumer's request.
+If there is no `SeqId` provided, consumer will receive most recent data.
+If consumer provides `SeqId` greater than most recent `SeqId`. Request will wait till new data received from producer.
 
 - **[Message transfer example](https://jsfiddle.net/jasajona/ntwmheaf/)**
 - **[Multiuser painting example](https://jsfiddle.net/jasajona/ky0cLgf9/)**
 
+## Writing permission
+Producer can take ownership of `channel id` by providing `wsecret` query parameter.
+Channel ownership can be set in Link and Mcast communication methods.
 
+`POST https://httprelay.io/mcast/mychan?wsecret=qwerty`
+
+after setting `wsecret=qwerty` on `mychan` channel, subsequent POST requests must provide `wsecret=qwerty` query parameter to write new data in to channel.
+If there are no successful POST requests, channel ownership expires in 20 minutes.
+
+
+
+## Response headers
+All communication methods receives response header fields with the following information:
+
+- **httprelay-method**: counterpart request HTTP method (GET, POST, PUT, etc.).
+- **httprelay-query**: counterpart request URL query (everything what follows after `?`).
+- **httprelay-time**: counterpart request timestamp. Moment when counterpart request was received.
+- **httprelay-your-time**: current request timestamp. Moment when current request was received.
+- **x-real-ip**: counterpart IP address.
+- **x-real-port**: counterpart outbound port.
 
 ## Command line arguments
 - **-a** Bind to IP address (default 0.0.0.0)
