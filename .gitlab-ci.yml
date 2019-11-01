@@ -73,7 +73,6 @@ prepare:ver:
 build:docker:img:
   stage: image
   image: docker:stable
-  extends: .prepare:ver
   artifacts:
     paths:
       - ver/
