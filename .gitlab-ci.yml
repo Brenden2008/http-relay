@@ -47,7 +47,7 @@ build:download:
     - rm -r bin
 
     - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-    - tar -czf download/httprelay_windows_arm64_$VERSION.tar.gz -C bin .
+    - tar -czf download/httprelay_windows_amd64_$VERSION.tar.gz -C bin .
     - rm -r bin
 
     - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...

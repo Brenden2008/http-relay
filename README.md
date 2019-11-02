@@ -1,15 +1,17 @@
 # HTTP Relay
-Client to client HTTP communication
+HTTP client to client (web browser to web browser) communication
 
 ***IMPORTANT!!!***
-_Due to increased service usage and user requests Httprelay is moving from SaS to OSS.
+_Due to increased service usage and user requests Httprelay.io is moving from SaS to OSS.
 Service that is accessible at https://httprelay.io is **going to be moved on 2019-10-10** to https://demo.httprelay.io.
 Please use your own deployments as https://demo.httprelay.io for demonstration purpose only!_ 
 
 ## Features
-- Communication between two or more HTTP clients (e.g. web browsers, mobile apps, IoT devices etc.)
-- Peer to peer mode.
-- Multicast (many receivers) mode.
+- Communication with old good and simple HTTP requests (supported by all web browsers and most platforms) 
+- Synchronous bidirectional data exchange
+- Synchronous one directional data transfer
+- Asynchronous and buffered one to many data transfer 
+- Communication channel ownership
 
 ## Installation
 ### Download
@@ -38,7 +40,7 @@ Go to http://localhost:8080/health should display version number.
 ## Communication methods
 
 ### Sync (Alice <-> Bob)
-Sync communication method provides peer to peer synchronous data exchange.
+Sync communication method provides HTTP client to HTTP client (web browser to web browser) synchronous data exchange.
 Two requests can exchange data on any HTTP method.
 
 - Alice: `GET https://demo.httprelay.io/sync/your_secret_channel_id?msg=Hello-Bob`
@@ -95,7 +97,7 @@ curl -X POST -v -H "Content-Type: text/plain" --data "I love you Alice" https://
 ```
 
 ### Link (Alice -> Bob)
-Link communication method provides peer to peer synchronous one directional data transfers.
+Link communication method provides HTTP client to HTTP client (web browser to web browser) synchronous one directional data transfers.
 Link communication method implements producer -> consumer pattern.
 Producer must use `POST` method, consumer must use `GET` method.  
 
@@ -107,13 +109,13 @@ If consumer makes request prior producer, receiver request will wait till produc
 
 **[Example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
 
-### Mcast (Alice -> Bob, Joe)
-Mcast communication method provides one to many buffered and asynchronous data transfers.
+### Mcast (Alice -> Bob, Carol)
+Mcast communication method provides one to many buffered and asynchronous HTTP client to HTTP client (web browser to web browser) data transfers.
 Mcast communication method must be used when there are multiple consumers and producer don't need to know when or if receivers received it's data.
 
 - Producer (Alice): `POST https://httprelay.io/mcast/your_secret_channel_id`
 - Consumer (Bob): `GET https://httprelay.io/mcast/your_secret_channel_id`
-- Consumer (Joe): `GET https://httprelay.io/mcast/your_secret_channel_id`
+- Consumer (Carol): `GET https://httprelay.io/mcast/your_secret_channel_id`
 
 Producers's request will finish as soon as all data is transferred to the server.
 Currently data is buffered in memory for 20 minutes (next Httprelay versions are going to support more data storage options).
