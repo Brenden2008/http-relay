@@ -108,7 +108,8 @@ Producer must use `POST` method, consumer must use `GET` method.
 Producer's request will be finished when consumer makes the request.
 If consumer makes request prior producer, receiver request will wait till producer makes the request.
 
-**[Example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
+- **[Text message transfer example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
+- **[GPS tracker example](https://jsfiddle.net/jasajona/mjrwLc3d/)**
 
 ### Mcast (Alice -> Bob, Carol)
 Mcast communication method provides one to many buffered and asynchronous HTTP client to HTTP client (web browser to web browser) data transfers.
