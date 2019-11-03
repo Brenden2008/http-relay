@@ -48,7 +48,8 @@ Two requests can exchange data on any HTTP method.
 
 URL query data is placed in `httprelay-query` response header field.
 
-**[Example](https://jsfiddle.net/jasajona/y35rLnd9/)**
+- **[Text message exchange example](https://jsfiddle.net/jasajona/y35rLnd9/)** Exchange text messages using just GET requests and query parameters
+- **[GPS tracker example](https://jsfiddle.net/jasajona/cgaju9o8/)** Exchange coordinates and track each others location on map in real time
 
 
 If the method supports content transfer (e.g. POST, PUT etc.) data is going to be received as a response body by the counterpart.
