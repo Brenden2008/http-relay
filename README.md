@@ -3,7 +3,7 @@ HTTP client to client (web browser to web browser) communication
 
 ***IMPORTANT!!!***
 _Due to increased service usage and user requests Httprelay.io is moving from SaS to OSS.
-Service that is accessible at https://httprelay.io is **going to be moved on 2019-10-10** to https://demo.httprelay.io.
+Service that is accessible at https://httprelay.io is **going to be moved on 2019-11-10** to https://demo.httprelay.io.
 Please use your own deployments as https://demo.httprelay.io for demonstration purpose only!_ 
 
 ## Features

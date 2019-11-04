@@ -19,6 +19,10 @@ build:download:
   extends:
   - .prepare:go
 
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "master"
+
   artifacts:
     paths:
     - ver/
@@ -72,12 +76,15 @@ build:docker:img:
   artifacts:
     paths:
       - ver/
+
   services:
   - docker:dind
+
   variables:
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
+
   script:
   - export VERSION=`cat ver/ver`
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
