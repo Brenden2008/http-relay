@@ -47,7 +47,7 @@ func (lc *LinkCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 	if strings.EqualFold(r.Method, http.MethodGet) {
 		if ptpData, ok := lc.rep.Read(id, r, r.Context().Done()); ok {
 			lc.AddWaiter()
-			ptpData.Write(w, yourTime, nil, reqOrigin(r))
+			ptpData.Write(w, yourTime)
 			lc.RemoveWaiter()
 		} else {
 			w.WriteHeader(http.StatusServiceUnavailable)
@@ -56,7 +56,7 @@ func (lc *LinkCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 		linkData := model.NewLinkData(r)
 		if meta, ok, auth := lc.rep.Write(id, linkData, wSecret(r), r.Context().Done()); ok && auth {
 			<-linkData.Data.Content.Buff()
-			meta.WriteHeaders(w, yourTime, nil, false, reqOrigin(r))
+			meta.WriteHeaders(w, yourTime, false)
 		} else {
 			if auth {
 				w.WriteHeader(http.StatusServiceUnavailable)

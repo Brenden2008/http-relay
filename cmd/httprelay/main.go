@@ -56,7 +56,6 @@ func main() {
 		fmt.Println("Server is listening on " + server.Addr().String())
 
 		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println("health req")
 			io.Copy(w, strings.NewReader(Version))
 		})
 

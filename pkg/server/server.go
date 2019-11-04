@@ -5,6 +5,7 @@ import (
 	"gitlab.com/jonas.jasas/httprelay/pkg/repository"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -30,20 +31,41 @@ func NewServer(listener net.Listener) (server *Server) {
 
 	syncRep := repository.NewSyncRep(server.stopChan)
 	syncCtrl := controller.NewSyncCtrl(syncRep, server.stopChan)
-	http.HandleFunc("/sync/", syncCtrl.Conduct)
+	http.HandleFunc("/sync/", corsHandler(syncCtrl.Conduct, []string{}))
 
 	linkRep := repository.NewLinkRep(server.stopChan)
 	linkCtrl := controller.NewLinkCtrl(linkRep, server.stopChan)
-	http.HandleFunc("/link/", linkCtrl.Conduct)
+	http.HandleFunc("/link/", corsHandler(linkCtrl.Conduct, []string{}))
 
 	mcastRep := repository.NewMcastRep(server.stopChan)
 	mcastCtrl := controller.NewMcastCtrl(mcastRep, server.stopChan)
-	http.HandleFunc("/mcast/", mcastCtrl.Conduct)
+	http.HandleFunc("/mcast/", corsHandler(mcastCtrl.Conduct, []string{"Httprelay-Seqid"}))
 
 	server.outdaters = []repository.Outdater{linkRep, mcastRep}
 	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl}
 
 	return
+}
+
+func corsHandler(h http.HandlerFunc, expose []string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		cors(w, r, expose)
+		if r.Method != "OPTIONS" {
+			h(w, r)
+		}
+	}
+}
+
+func cors(w http.ResponseWriter, r *http.Request, expose []string) {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		origin = "*"
+	}
+	w.Header().Set("Access-Control-Allow-Origin", origin)
+	w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS")
+	expose = append(expose, "Content-Length, X-Real-IP, X-Real-Port, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query")
+	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
 }
 
 func (s *Server) Start() <-chan error {

@@ -55,8 +55,7 @@ func (mc *McastCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 		if seqId, ok := mc.rep.Write(mcastId, data, wSecret(r)); ok {
 			if _, err := data.CopyContent(); err == nil {
 				w.Header().Set("Httprelay-Seqid", strconv.Itoa(seqId))
-				//w.Header().Set("Access-Control-Expose-Headers", "Httprelay-Seqid")
-				data.Meta.WriteHeaders(w, yourTime, []string{"Httprelay-Seqid"}, false, reqOrigin(r))
+				data.Meta.WriteHeaders(w, yourTime, false)
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
@@ -80,7 +79,7 @@ func writeHeaders(w http.ResponseWriter, r *http.Request, seqId int, data *model
 	w.Header().Set("Httprelay-Seqid", strconv.Itoa(seqId))
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	data.Meta.WriteHeaders(w, yourTime, []string{"Httprelay-Seqid"}, true, reqOrigin(r))
+	data.Meta.WriteHeaders(w, yourTime, true)
 }
 
 func seqId(r *http.Request) (seqId int) {

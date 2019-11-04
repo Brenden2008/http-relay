@@ -54,7 +54,7 @@ func (m *Meta) Memory() int64 {
 	return int64(structSize) + int64(stringSize)
 }
 
-func (m *Meta) WriteHeaders(w http.ResponseWriter, yourTime time.Time, expose []string, content bool, origin string) {
+func (m *Meta) WriteHeaders(w http.ResponseWriter, yourTime time.Time, content bool) {
 	if content {
 		if m.ContentType != "" {
 			w.Header().Set("Content-Type", m.ContentType)
@@ -71,11 +71,6 @@ func (m *Meta) WriteHeaders(w http.ResponseWriter, yourTime time.Time, expose []
 	w.Header().Set("Httprelay-Method", m.Method)
 	if m.Query != "" {
 		w.Header().Set("Httprelay-Query", m.Query)
-	}
-	expose = append([]string{"X-Real-IP", "X-Real-Port", "Httprelay-Time", "Httprelay-Your-Time", "Httprelay-Method", "Httprelay-Query"}, expose...)
-	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
-	if origin != "" {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
 	}
 }
 

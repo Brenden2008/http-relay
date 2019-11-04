@@ -45,7 +45,7 @@ func (sc *SyncCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 	syncData := model.NewSyncData(r)
 	if ptpData, ok := sc.rep.Conduct(linkId, syncData, r.Context().Done()); ok {
 		<-syncData.Data.Content.Buff()
-		ptpData.Write(w, yourTime, nil, reqOrigin(r))
+		ptpData.Write(w, yourTime)
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
