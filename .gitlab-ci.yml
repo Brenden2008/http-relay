@@ -12,7 +12,6 @@ stages:
 - test
 - build
 - image
-#- deploy
 
 test:race:
   stage: test
