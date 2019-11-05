@@ -20,6 +20,7 @@ test:
   image: alpine
   script:
     - echo $CI_COMMIT_REF_NAME
+    - echo $CI_COMMIT_TAG
 
 #build:download:
 #  stage: build
