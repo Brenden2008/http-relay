@@ -9,93 +9,82 @@
     - go get ./...
 
 stages:
-  - test
-#- build
-#- test
-#- image
+- test
+- build
+- image
 #- deploy
 
-test:
+test:race:
   stage: test
-  image: alpine
+  extends: .prepare:go
   script:
-    - echo $CI_COMMIT_REF_NAME
-    - echo $CI_COMMIT_TAG
+    - go build --race ./cmd/...
 
-#build:download:
-#  stage: build
-#  extends:
-#  - .prepare:go
-#
-#  only:
-#    variables:
-#      - $CI_COMMIT_REF_NAME == "master"
-#
-#  artifacts:
-#    paths:
-#    - ver/
-#    - download/
-#
-#  script:
-#    - mkdir download ver
-#
-#    - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
-#    - export VERSION=`cat ver/ver`
-#
-#    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_386_$VERSION.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_amd64_$VERSION.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm_$VERSION.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm64_$VERSION.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-#    - tar -czf download/httprelay_windows_amd64_$VERSION.tar.gz -C bin .
-#    - rm -r bin
-#
-#    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_macosx_arm64_$VERSION.tar.gz -C bin .
-#    - rm -r bin
-#
-#test:race:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go build --race ./cmd/...
-#
-#test:integration:
-#  stage: test
-#  extends: .prepare:go
-#  script:
-#    - go test ./test/... -cover
-#
-#build:docker:img:
-#  stage: image
-#  image: docker:stable
-#  artifacts:
-#    paths:
-#      - ver/
-#
-#  services:
-#  - docker:dind
-#
-#  variables:
-#    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_DRIVER: overlay2
-#
-#  script:
-#  - export VERSION=`cat ver/ver`
-#  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-#  - docker build --tag $CONTAINER_IMAGE:$VERSION --tag $CONTAINER_IMAGE .
-#  - docker push $CONTAINER_IMAGE:$VERSION
-#  - docker push $CONTAINER_IMAGE
+test:integration:
+  stage: test
+  extends: .prepare:go
+  script:
+    - go test ./test/... -cover
+
+build:download:
+  stage: build
+  extends:
+  - .prepare:go
+
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "master"
+      - $CI_COMMIT_TAG
+
+  artifacts:
+    paths:
+    - download/
+
+  script:
+    - mkdir download ver
+
+    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_arm_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+    - tar -czf download/httprelay_windows_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+build:docker:img:
+  stage: build
+  image: docker:stable
+
+  only:
+    variables:
+      - $CI_COMMIT_TAG
+
+  services:
+  - docker:dind
+
+  variables:
+    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+
+  script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG
+  - [ $CI_COMMIT_REF_NAME == "master" ] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE:latest .
+  - docker push $CONTAINER_IMAGE
