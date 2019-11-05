@@ -9,109 +9,93 @@
     - go get ./...
 
 stages:
-- build
-- test
-- image
+  - test
+#- build
+#- test
+#- image
 #- deploy
 
-build:download:
-  stage: build
-  extends:
-  - .prepare:go
-
-  only:
-    variables:
-      - $CI_COMMIT_REF_NAME == "master"
-
-  artifacts:
-    paths:
-    - ver/
-    - download/
-
-  script:
-    - mkdir download ver
-
-    - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
-    - export VERSION=`cat ver/ver`
-
-    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_386_$VERSION.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_amd64_$VERSION.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm_$VERSION.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm64_$VERSION.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-    - tar -czf download/httprelay_windows_amd64_$VERSION.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_macosx_arm64_$VERSION.tar.gz -C bin .
-    - rm -r bin
-
-test:race:
+test:
   stage: test
-  extends: .prepare:go
+  image: alpine
   script:
-    - go build --race ./cmd/...
+    - echo $CI_COMMIT_REF_NAME
 
-test:integration:
-  stage: test
-  extends: .prepare:go
-  script:
-    - go test ./test/... -cover
 
-build:docker:img:
-  stage: image
-  image: docker:stable
-  artifacts:
-    paths:
-      - ver/
-
-  services:
-  - docker:dind
-
-  variables:
-    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
-
-  script:
-  - export VERSION=`cat ver/ver`
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  - docker build --tag $CONTAINER_IMAGE:$VERSION --tag $CONTAINER_IMAGE .
-  - docker push $CONTAINER_IMAGE:$VERSION
-  - docker push $CONTAINER_IMAGE
-
-#deploy:aws:
-#  stage: deploy
-#  dependencies: []
-#  variables:
-#    GIT_STRATEGY: none
-#  image:
-#    name: robpco/awscli
-#    entrypoint:
-#      - '/usr/bin/env'
-#      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+#build:download:
+#  stage: build
+#  extends:
+#  - .prepare:go
+#
+#  only:
+#    variables:
+#      - $CI_COMMIT_REF_NAME == "master"
+#
+#  artifacts:
+#    paths:
+#    - ver/
+#    - download/
+#
 #  script:
-#    - aws ecs update-service --cluster httprelay --service httprelay-service --force-new-deployment
-
-#gae:deploy:prod:
-#  stage: deploy
+#    - mkdir download ver
+#
+#    - date --date="`git show -s --format=%ci`" "+%Y%m%d-%H%M" > ver/ver
+#    - export VERSION=`cat ver/ver`
+#
+#    - GOOS=linux GOARCH=386 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_386_$VERSION.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_amd64_$VERSION.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm_$VERSION.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm64_$VERSION.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+#    - tar -czf download/httprelay_windows_amd64_$VERSION.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_macosx_arm64_$VERSION.tar.gz -C bin .
+#    - rm -r bin
+#
+#test:race:
+#  stage: test
 #  extends: .prepare:go
 #  script:
-#    - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-#    - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-#    - apt-get update && apt-get install google-cloud-sdk google-cloud-sdk-app-engine-go --yes
-#    - mv $GAE_KEY_FILE $GAE_KEY_FILE.json
-#    - gcloud auth activate-service-account gae-deployer@http-relay-1490338352158.iam.gserviceaccount.com --key-file=$GAE_KEY_FILE.json --project=http-relay-1490338352158
-#    - gcloud app deploy $CI_PROJECT_DIR/cmd/httprelay/app.yaml --quiet
+#    - go build --race ./cmd/...
+#
+#test:integration:
+#  stage: test
+#  extends: .prepare:go
+#  script:
+#    - go test ./test/... -cover
+#
+#build:docker:img:
+#  stage: image
+#  image: docker:stable
+#  artifacts:
+#    paths:
+#      - ver/
+#
+#  services:
+#  - docker:dind
+#
+#  variables:
+#    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+#    DOCKER_HOST: tcp://docker:2375
+#    DOCKER_DRIVER: overlay2
+#
+#  script:
+#  - export VERSION=`cat ver/ver`
+#  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+#  - docker build --tag $CONTAINER_IMAGE:$VERSION --tag $CONTAINER_IMAGE .
+#  - docker push $CONTAINER_IMAGE:$VERSION
+#  - docker push $CONTAINER_IMAGE
