@@ -67,7 +67,7 @@ build:download:
 
 build:docker:img:
   stage: build
-  image: docker:git
+  image: docker:stable
 
   only:
     variables:
