@@ -85,7 +85,7 @@ build:docker:img:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
 
-  - export BRANCH=`git rev-parse --abbrev-ref HEAD`
+  - export BRANCH=`git symbolic-ref --short HEAD`
   - echo $BRANCH
   - '[ $BRANCH == "master" ] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
 
