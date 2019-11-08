@@ -67,7 +67,7 @@ build:download:
 
 build:docker:img:
   stage: build
-  image: docker:stable
+  image: docker:git
 
   only:
     variables:
@@ -85,11 +85,8 @@ build:docker:img:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
 
-  - echo $CI_COMMIT_REF_NAME
-  - docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE
-
-#  - export BRANCH=`git rev-parse --abbrev-ref HEAD`
-#  - '[ $BRANCH == "master" ] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE:latest'
-#  - docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE
+  - export BRANCH=`git rev-parse --abbrev-ref HEAD`
+  - echo $BRANCH
+  - '[ $BRANCH == "master" ] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
 
   - docker push $CONTAINER_IMAGE
