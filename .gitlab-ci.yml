@@ -86,7 +86,7 @@ build:docker:img:
   - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
 
   - echo $CI_COMMIT_REF_NAME
-  - docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE:latest
+  - docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE
 
 #  - export BRANCH=`git rev-parse --abbrev-ref HEAD`
 #  - '[ $BRANCH == "master" ] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE:latest'

@@ -6,8 +6,7 @@ RUN echo 'nobody:x:65534:65534:Nobody:/:' > /passwd
 WORKDIR $GOPATH/src/httprelay
 COPY --from=vcs /httprelay/ .
 RUN go get ./...
-RUN export version=`git describe --tag`
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X main.Version=`cat version`" -o /httprelay ./cmd/...
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X main.Version=`git rev-parse --abbrev-ref HEAD`" -o /httprelay ./cmd/...
 
 FROM scratch
 COPY --from=build /passwd /etc/passwd
