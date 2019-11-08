@@ -32,7 +32,7 @@ build:download:
 
   only:
     variables:
-      - $CI_COMMIT_REF_NAME == "master" && $CI_COMMIT_TAG
+      - $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
 
   artifacts:
     paths:
@@ -84,5 +84,5 @@ build:docker:img:
   script:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
-  - '[ $CI_COMMIT_REF_NAME == "master" ] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE:latest'
+  - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
   - docker push $CONTAINER_IMAGE
