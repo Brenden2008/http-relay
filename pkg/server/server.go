@@ -58,7 +58,7 @@ func corsHandler(h http.HandlerFunc, expose []string) http.HandlerFunc {
 }
 
 func cors(w http.ResponseWriter, r *http.Request, expose []string) {
-	if r.Method != "OPTIONS" {
+	if r.Method == "OPTIONS" {
 		origin := r.Header.Get("Origin")
 		if origin == "" {
 			origin = "*"
