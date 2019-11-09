@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var Version string
+var Version string = "bbb"
 
 type Server struct {
 	net.Listener
