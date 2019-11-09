@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"gitlab.com/jonas.jasas/httprelay/pkg/server"
+	ver "gitlab.com/jonas.jasas/httprelay/pkg/server"
 	"io"
 	"net"
 	"net/http"
@@ -46,7 +47,7 @@ func listener() (net.Listener, error) {
 
 func main() {
 	fmt.Println("========================================================================")
-	fmt.Println("Starting Httprelay version:", server.Version)
+	fmt.Println("Starting Httprelay version:", ver.Version)
 
 	if listener, err := listener(); err == nil {
 		srv := server.NewServer(listener)
@@ -54,7 +55,7 @@ func main() {
 		fmt.Println("Server is listening on " + srv.Addr().String())
 
 		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			io.Copy(w, strings.NewReader(server.Version))
+			io.Copy(w, strings.NewReader(ver.Version))
 		})
 
 		intChan := make(chan os.Signal, 1)
