@@ -21,8 +21,6 @@ var args struct {
 	StopPath string
 }
 
-var Version string
-
 func init() {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
@@ -48,15 +46,15 @@ func listener() (net.Listener, error) {
 
 func main() {
 	fmt.Println("========================================================================")
-	fmt.Println("Starting Httprelay version:", Version)
+	fmt.Println("Starting Httprelay version:", server.Version)
 
 	if listener, err := listener(); err == nil {
-		server := server.NewServer(listener)
-		errChan := server.Start()
-		fmt.Println("Server is listening on " + server.Addr().String())
+		srv := server.NewServer(listener)
+		errChan := srv.Start()
+		fmt.Println("Server is listening on " + srv.Addr().String())
 
 		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			io.Copy(w, strings.NewReader(Version))
+			io.Copy(w, strings.NewReader(server.Version))
 		})
 
 		intChan := make(chan os.Signal, 1)
@@ -69,14 +67,14 @@ func main() {
 
 		select {
 		case <-intChan:
-			fmt.Printf("Stopping server %s...", server.Addr())
-			server.Stop(time.Second)
+			fmt.Printf("Stopping server %s...", srv.Addr())
+			srv.Stop(time.Second)
 		case err := <-errChan:
 			fmt.Fprintln(os.Stderr, "ERROR unable to serve: ", err)
 		}
 
-		if server.Addr().Network() == "unix" {
-			os.Remove(server.Addr().String())
+		if srv.Addr().Network() == "unix" {
+			os.Remove(srv.Addr().String())
 			//syscall.Umask(0000)
 		}
 		fmt.Println("done.")

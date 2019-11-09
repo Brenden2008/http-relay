@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+var Version string
+
 type Server struct {
 	net.Listener
 	stopChan  chan struct{}
@@ -58,6 +60,8 @@ func corsHandler(h http.HandlerFunc, expose []string) http.HandlerFunc {
 }
 
 func cors(w http.ResponseWriter, r *http.Request, expose []string) {
+	w.Header().Set("Httprelay-Version", Version)
+
 	if r.Method == "OPTIONS" {
 		origin := r.Header.Get("Origin")
 		if origin == "" {
@@ -67,7 +71,7 @@ func cors(w http.ResponseWriter, r *http.Request, expose []string) {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	} else {
-		expose = append(expose, "Content-Length, X-Real-IP, X-Real-Port, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query")
+		expose = append(expose, "Content-Length, X-Real-IP, X-Real-Port, Httprelay-Version, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query")
 		w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
 	}
 }
