@@ -16,12 +16,18 @@ stages:
 test:race:
   stage: test
   extends: .prepare:go
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
   script:
     - go build --race ./cmd/...
 
 test:integration:
   stage: test
   extends: .prepare:go
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
   script:
     - go test ./test/... -cover
 
