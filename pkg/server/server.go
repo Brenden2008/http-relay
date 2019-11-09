@@ -58,14 +58,18 @@ func corsHandler(h http.HandlerFunc, expose []string) http.HandlerFunc {
 }
 
 func cors(w http.ResponseWriter, r *http.Request, expose []string) {
-	origin := r.Header.Get("Origin")
-	if origin == "" {
-		origin = "*"
+	if r.Method != "OPTIONS" {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	} else {
+		expose = append(expose, "Content-Length, X-Real-IP, X-Real-Port, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query")
+		w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
 	}
-	w.Header().Set("Access-Control-Allow-Origin", origin)
-	w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS")
-	expose = append(expose, "Content-Length, X-Real-IP, X-Real-Port, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query")
-	w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
 }
 
 func (s *Server) Start() <-chan error {
