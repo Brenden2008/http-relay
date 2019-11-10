@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var Version string = "test"
+var Version string
 
 type Server struct {
 	net.Listener
@@ -21,10 +21,6 @@ type Server struct {
 
 type Waiter interface {
 	Wait() <-chan struct{}
-}
-
-func Ver() string {
-	return "testf"
 }
 
 func NewServer(listener net.Listener) (server *Server) {
