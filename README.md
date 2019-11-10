@@ -130,6 +130,7 @@ If consumer provides `SeqId` greater than most recent `SeqId`. Request will wait
 
 - **[Message transfer example](https://jsfiddle.net/jasajona/ntwmheaf/)**
 - **[Multiuser painting example](https://jsfiddle.net/jasajona/ky0cLgf9/)**
+- **[Location sharing example](https://jsfiddle.net/jasajona/5ks1y3nL/)** 
 
 ## Writing permission
 Producer can take ownership of `channel id` by providing `wsecret` query parameter.
