@@ -23,6 +23,10 @@ type Waiter interface {
 	Wait() <-chan struct{}
 }
 
+func Ver() string {
+	return "testf"
+}
+
 func NewServer(listener net.Listener) (server *Server) {
 	server = &Server{
 		stopChan: make(chan struct{}),
