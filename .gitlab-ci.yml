@@ -9,16 +9,16 @@
     - go get ./...
 
 stages:
-- test
-- build
-- image
+  - test
+  - build
+  - image
 
 test:race:
   stage: test
   extends: .prepare:go
   only:
-    variables:
-      - $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+    - tags
+
   script:
     - go build --race ./cmd/...
 
@@ -26,23 +26,23 @@ test:integration:
   stage: test
   extends: .prepare:go
   only:
-    variables:
-      - $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+    - tags
+
   script:
     - go test ./test/... -cover
 
 build:download:
   stage: build
   extends:
-  - .prepare:go
+    - .prepare:go
 
   only:
-    variables:
-      - $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+    - tags
+    - /v\d*/
 
   artifacts:
     paths:
-    - download/
+      - download/
 
   script:
     - mkdir download
@@ -76,11 +76,10 @@ build:docker:img:
   image: docker:stable
 
   only:
-    variables:
-      - $CI_COMMIT_TAG
+    - tags
 
   services:
-  - docker:dind
+    - docker:dind
 
   variables:
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
@@ -88,7 +87,7 @@ build:docker:img:
     DOCKER_DRIVER: overlay2
 
   script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
-  - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
-  - docker push $CONTAINER_IMAGE
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
+    - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
+    - docker push $CONTAINER_IMAGE
