@@ -20,7 +20,7 @@ deploy:release:
 
   script:
     - >
-      curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: $CI_JOB_TOKEN"
+      curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: $API_TOKEN"
       --data '{ "name": "New release", "tag_name": "v2", "description": "Super nice release", "assets": { "links": [{ "name": "hoge", "url": "https://google.com" }] } }'
       --request POST https://gitlab.com/api/v4/projects/11083648/releases
 
