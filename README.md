@@ -129,9 +129,10 @@ If there is no `SeqId` provided, consumer will receive most recent data.
 If consumer provides `SeqId` greater than most recent `SeqId`. Request will wait till new data received from producer.
 
 - **[Message transfer example](https://jsfiddle.net/jasajona/ntwmheaf/)**
-- **[Multiuser painting example](https://jsfiddle.net/jasajona/ky0cLgf9/)**
-- **[Location sharing example](https://jsfiddle.net/jasajona/5ks1y3nL/)** 
-
+- **[Multi-user painting example](https://jsfiddle.net/jasajona/ky0cLgf9/)**
+- **[Location sharing example](https://jsfiddle.net/jasajona/5ks1y3nL/)**
+- **[Image exchange example](https://jsfiddle.net/jasajona/f2an7tjh/)**
+ 
 ## Writing permission
 Producer can take ownership of `channel id` by providing `wsecret` query parameter.
 Channel ownership can be set in Link and Mcast communication methods.
