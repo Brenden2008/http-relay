@@ -16,7 +16,7 @@ stages:
 
 deploy:release:
   stage: deploy
-  image: alpine
+  image: pstauffer/curl
 
   script:
     - >
