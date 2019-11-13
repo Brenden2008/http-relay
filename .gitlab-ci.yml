@@ -82,7 +82,7 @@ build:download:
 
     - >
       curl --header "Content-Type: application/json" --header "PRIVATE-TOKEN: $API_TOKEN" --trace-ascii /dev/stdout
-      --data "{ 'name': '$CI_COMMIT_REF_NAME', 'tag_name': '$CI_COMMIT_REF_NAME', 'description': '$CI_COMMIT_MESSAGE', 'assets': { 'links': [{ 'name': 'Download binaries', 'url': 'https://gitlab.com/jonas.jasas/httprelay/-/jobs/$CI_JOB_ID/artifacts/browse/download' }] } }"
+      --data "{ \"name\": \"$CI_COMMIT_REF_NAME\", \"tag_name\": \"$CI_COMMIT_REF_NAME\", \"description\": \"$CI_COMMIT_MESSAGE\", \"assets\": { \"links\": [{ \"name\": \"Download binaries\", \"url\": \"https://gitlab.com/jonas.jasas/httprelay/-/jobs/$CI_JOB_ID/artifacts/browse/download\" }] } }"
       --request POST https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
 #build:docker:img:
