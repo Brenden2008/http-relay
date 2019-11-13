@@ -25,7 +25,6 @@ deploy:release:
       --request POST https://gitlab.com/api/v4/projects/11083648/releases
 
 
-
 #test:race:
 #  stage: test
 #  extends: .prepare:go
