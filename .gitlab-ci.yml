@@ -9,37 +9,37 @@
     - go get ./...
 
 stages:
-  - test
+#  - test
   - build
-  - image
-  - deploy
+#  - image
+#  - deploy
 
-test:race:
-  stage: test
-  extends: .prepare:go
-  only:
-    - tags
-
-  script:
-    - go build --race ./cmd/...
-
-test:integration:
-  stage: test
-  extends: .prepare:go
-  only:
-    - tags
-
-  script:
-    - go test ./test/... -cover
+#test:race:
+#  stage: test
+#  extends: .prepare:go
+#  only:
+#    - tags
+#
+#  script:
+#    - go build --race ./cmd/...
+#
+#test:integration:
+#  stage: test
+#  extends: .prepare:go
+#  only:
+#    - tags
+#
+#  script:
+#    - go test ./test/... -cover
 
 build:download:
   stage: build
   extends:
     - .prepare:go
 
-  only:
-    - tags
-    - /v\d*/
+#  only:
+#    - tags
+#    - /v\d*/
 
   artifacts:
     paths:
@@ -72,42 +72,47 @@ build:download:
     - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
     - rm -r bin
 
+#    - >
+#      curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
+
     - >
-      curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
+      echo --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: $API_TOKEN"
+      --data '{ "name": "'"$CI_COMMIT_REF_NAME"'", "tag_name": "'"$CI_COMMIT_REF_NAME"'", "description": "'"$CI_COMMIT_MESSAGE"'", "assets": { "links": [{ "name": "hoge", "url": "/jonas.jasas/httprelay/-/jobs/$CI_JOB_ID/artifacts/browse/download" }] } }'
+      --request POST https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
     - >
       curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: $API_TOKEN"
-      --data '{ "name": "'"$CI_COMMIT_TAG"'", "tag_name": "'"$CI_COMMIT_TAG"'", "description": "'"$CI_COMMIT_MESSAGE"'", "assets": { "links": [{ "name": "hoge", "url": "/jonas.jasas/httprelay/-/jobs/$CI_JOB_ID/artifacts/browse/download" }] } }'
+      --data '{ "name": "'"$CI_COMMIT_REF_NAME"'", "tag_name": "'"$CI_COMMIT_REF_NAME"'", "description": "'"$CI_COMMIT_MESSAGE"'", "assets": { "links": [{ "name": "hoge", "url": "/jonas.jasas/httprelay/-/jobs/$CI_JOB_ID/artifacts/browse/download" }] } }'
       --request POST https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
-build:docker:img:
-  stage: build
-  image: docker:stable
-
-  only:
-    - tags
-
-  services:
-    - docker:dind
-
-  variables:
-    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
-
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
-    - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
-    - docker push $CONTAINER_IMAGE
-
-pages:
-  stage: deploy
-  image: alpine:latest
-  script:
-    - echo 'Nothing to do...'
-  artifacts:
-    paths:
-      - public
-  only:
-    - master
+#build:docker:img:
+#  stage: build
+#  image: docker:stable
+#
+#  only:
+#    - tags
+#
+#  services:
+#    - docker:dind
+#
+#  variables:
+#    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+#    DOCKER_HOST: tcp://docker:2375
+#    DOCKER_DRIVER: overlay2
+#
+#  script:
+#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+#    - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
+#    - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
+#    - docker push $CONTAINER_IMAGE
+#
+#pages:
+#  stage: deploy
+#  image: alpine:latest
+#  script:
+#    - echo 'Nothing to do...'
+#  artifacts:
+#    paths:
+#      - public
+#  only:
+#    - master
