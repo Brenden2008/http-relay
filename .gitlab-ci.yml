@@ -26,6 +26,7 @@ deploy:release:
       --data '{ "name": "New release", "tag_name": "v2", "description": "Super nice release", "assets": { "links": [{ "name": "hoge", "url": "https://google.com" }] } }'
       --request POST https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
+
 #test:race:
 #  stage: test
 #  extends: .prepare:go
