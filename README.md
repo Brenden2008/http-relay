@@ -15,7 +15,7 @@ Please use your own deployments as https://demo.httprelay.io for demonstration p
 
 ## Installation
 ### Download
-[Download executable](/jonas.jasas/httprelay/-/releases) (Linux, Mac, Windows)
+[Download executable](https://gitlab.com/jonas.jasas/httprelay/-/releases) (Linux, Mac, Windows)
 
 ### Docker
 - Latest image: `registry.gitlab.com/jonas.jasas/httprelay`
