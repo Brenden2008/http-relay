@@ -37,8 +37,9 @@ build:download:
   extends:
     - .prepare:go
 
-#  only:
-#    - tags
+  only:
+    - tags
+    - /v.*/
 #    - /v\d*/
 
   artifacts:
@@ -74,6 +75,8 @@ build:download:
 
 #    - >
 #      curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
+
+    - echo $CI_COMMIT_TAG
 
     - >
       echo -v --header "Content-Type: application/json" --header "PRIVATE-TOKEN: $API_TOKEN"
