@@ -39,7 +39,7 @@ build:download:
 
   only:
     - tags
-#    - /v\d*/
+    - /v\d*/
 
   artifacts:
     paths:
