@@ -95,7 +95,7 @@ curl -X POST -v -H "Content-Type: text/plain" --data "I love you Alice" https://
 ### Link (Alice -> Bob)
 Link communication method provides HTTP client to HTTP client (web browser to web browser) synchronous one-directional data transfers.
 The Link communication method implements producer -> consumer pattern.
-AThe producer must use `POST` method, the consumer must use `GET` method.  
+The producer must use `POST` method, the consumer must use `GET` method.  
 
 - Producer: `POST https://demo.httprelay.io/link/your_secret_channel_id`
 - Consumer: `GET https://demo.httprelay.io/link/your_secret_channel_id`
