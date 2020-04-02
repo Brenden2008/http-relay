@@ -1,15 +1,13 @@
 package model
 
-import "net/http"
-
 type ProxyData struct {
-	CliChan chan *PtpData
-	SerChan chan *PtpData
+	Req      *PtpData
+	RespChan chan *PtpData
 }
 
-func NewProxyData(r *http.Request) *ProxyData {
+func NewProxyData(data *PtpData) *ProxyData {
 	return &ProxyData{
-		CliChan: make(chan *PtpData),
-		SerChan: make(chan *PtpData),
+		Req:      data,
+		RespChan: make(chan *PtpData),
 	}
 }
