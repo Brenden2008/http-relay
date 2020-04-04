@@ -8,24 +8,23 @@ import (
 type serMap map[string]*model.ProxySer
 
 type ProxyRep struct {
-	serMap
-	sync.Mutex
+	serMap  serMap
+	serMapL sync.Mutex
 }
 
-func NewProxy() *ProxyRep {
+func NewProxyRep() *ProxyRep {
 	return &ProxyRep{
-		serMap: make(serMap),
+		serMap: serMap{},
 	}
 }
 
-func (pr *ProxyRep) GetServer(serId string) *model.ProxySer {
-	pr.Lock()
-	defer pr.Unlock()
+func (pr *ProxyRep) GetSer(serId string) *model.ProxySer {
+	pr.serMapL.Lock()
+	defer pr.serMapL.Unlock()
 	proxySer, ok := pr.serMap[serId]
 	if !ok {
 		proxySer = model.NewProxySer()
 		pr.serMap[serId] = proxySer
 	}
-
 	return proxySer
 }

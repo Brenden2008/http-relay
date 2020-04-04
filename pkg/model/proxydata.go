@@ -1,13 +1,22 @@
 package model
 
+import (
+	"gitlab.com/jonas.jasas/buffreader"
+	"net/http"
+)
+
 type ProxyData struct {
-	Req      *PtpData
-	RespChan chan *PtpData
+	Path     string
+	Header   *http.Header
+	Body     *buffreader.BuffReader
+	RespChan chan *ProxyData
 }
 
-func NewProxyData(data *PtpData) *ProxyData {
+func NewProxyData(r *http.Request, path string) *ProxyData {
 	return &ProxyData{
-		Req:      data,
-		RespChan: make(chan *PtpData),
+		Path:     path,
+		Header:   &r.Header,
+		Body:     buffreader.New(r.Body),
+		RespChan: make(chan *ProxyData),
 	}
 }

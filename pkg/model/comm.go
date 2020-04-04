@@ -1,6 +1,7 @@
 package model
 
 import (
+	"sync"
 	"time"
 )
 
@@ -9,6 +10,7 @@ const MaxAge = time.Minute * 20
 type comm struct {
 	accessed time.Time
 	wSecret  string
+	m        sync.RWMutex
 	*Waiters
 }
 
@@ -20,8 +22,8 @@ func newComm() comm {
 }
 
 func (c *comm) WAuth(wSecret string) bool {
-	c.Lock()
-	defer c.Unlock()
+	c.m.Lock()
+	defer c.m.Unlock()
 
 	if c.wSecret == "" {
 		c.wSecret = wSecret
@@ -30,13 +32,13 @@ func (c *comm) WAuth(wSecret string) bool {
 }
 
 func (c *comm) Expired() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.m.RLock()
+	defer c.m.RUnlock()
 	return time.Since(c.accessed) > MaxAge && !c.Waiters.HasWaiters()
 }
 
 func (c *comm) Accessed() {
-	c.Lock()
+	c.m.Lock()
+	defer c.m.Unlock()
 	c.accessed = time.Now()
-	c.Unlock()
 }

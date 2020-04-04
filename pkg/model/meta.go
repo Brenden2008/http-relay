@@ -12,6 +12,7 @@ import (
 
 type Meta struct {
 	Time          time.Time
+	Header        http.Header
 	ContentType   string
 	Method        string
 	Query         string
@@ -33,7 +34,7 @@ func NewMeta(r *http.Request) *Meta {
 	query := filterQuery(r.URL.Query())
 	method := r.Method
 
-	return &Meta{t, contentType, method, query.Encode(), srcIP, srcPort, r.ContentLength}
+	return &Meta{t, r.Header, contentType, method, query.Encode(), srcIP, srcPort, r.ContentLength}
 }
 
 func filterQuery(query url.Values) (filtered url.Values) {

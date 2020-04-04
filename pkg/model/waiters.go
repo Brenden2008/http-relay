@@ -7,7 +7,7 @@ import (
 type Waiters struct {
 	waiters  int
 	waitChan chan struct{}
-	sync.RWMutex
+	m        sync.RWMutex
 }
 
 func NewWaiters() *Waiters {
@@ -17,8 +17,8 @@ func NewWaiters() *Waiters {
 }
 
 func (w *Waiters) AddWaiter() {
-	w.Lock()
-	defer w.Unlock()
+	w.m.Lock()
+	defer w.m.Unlock()
 
 	if w.waiters == 0 {
 		w.waitChan = make(chan struct{})
@@ -28,8 +28,8 @@ func (w *Waiters) AddWaiter() {
 }
 
 func (w *Waiters) RemoveWaiter() {
-	w.Lock()
-	defer w.Unlock()
+	w.m.Lock()
+	defer w.m.Unlock()
 
 	if w.waiters > 0 {
 		w.waiters--
@@ -41,15 +41,14 @@ func (w *Waiters) RemoveWaiter() {
 }
 
 func (w *Waiters) Wait() <-chan struct{} {
-	w.RLock()
-	defer w.RUnlock()
-
+	w.m.RLock()
+	defer w.m.RUnlock()
 	return w.waitChan
 }
 
 func (w *Waiters) WaiterCount() int {
-	w.RLock()
-	defer w.RUnlock()
+	w.m.RLock()
+	defer w.m.RUnlock()
 	return w.waiters
 }
 
