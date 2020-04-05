@@ -13,10 +13,12 @@ type ProxyData struct {
 }
 
 func NewProxyData(r *http.Request, path string) *ProxyData {
+	br := buffreader.New(r.Body)
+	br.Buff()
 	return &ProxyData{
 		Path:     path,
 		Header:   &r.Header,
-		Body:     buffreader.New(r.Body),
+		Body:     br,
 		RespChan: make(chan *ProxyData),
 	}
 }

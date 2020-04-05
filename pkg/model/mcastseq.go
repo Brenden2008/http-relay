@@ -1,13 +1,15 @@
 package model
 
 import (
+	"sync"
 	"time"
 )
 
 type McastSeq struct {
-	mcastDataMap map[int]*McastData
-	newSeqId     int
-	oldSeqId     int
+	mcastDataMap  map[int]*McastData
+	mcastDataMapL sync.RWMutex
+	newSeqId      int
+	oldSeqId      int
 	comm
 }
 
@@ -23,16 +25,16 @@ func NewMcastSeq(initialSeqId int) *McastSeq {
 }
 
 func (ms *McastSeq) Close() {
-	ms.RLock()
-	defer ms.RUnlock()
+	ms.mcastDataMapL.RLock()
+	defer ms.mcastDataMapL.RUnlock()
 	for _, v := range ms.mcastDataMap {
 		v.Close()
 	}
 }
 
 func (ms *McastSeq) GetData(seqId int) (data *TeeData, ok bool) {
-	ms.RLock()
-	defer ms.RUnlock()
+	ms.mcastDataMapL.RLock()
+	defer ms.mcastDataMapL.RUnlock()
 
 	if seqId < ms.newSeqId {
 		if mcastData, ok := ms.mcastDataMap[seqId]; ok {
@@ -47,7 +49,7 @@ func (ms *McastSeq) Read(wantedSeqId int, closeChan <-chan struct{}) (data *TeeD
 	ms.AddWaiter()
 	defer ms.RemoveWaiter()
 
-	ms.Lock()
+	ms.mcastDataMapL.Lock()
 	if wantedSeqId == -1 {
 		if ms.newSeqId == ms.oldSeqId {
 			seqId = ms.newSeqId
@@ -63,15 +65,15 @@ func (ms *McastSeq) Read(wantedSeqId int, closeChan <-chan struct{}) (data *TeeD
 	}
 
 	mcastData := ms.mcastDataMap[seqId]
-	ms.Unlock()
+	ms.mcastDataMapL.Unlock()
 
 	data, ok = mcastData.Read(closeChan)
 	return
 }
 
 func (ms *McastSeq) Write(data *TeeData) (seqId int) {
-	ms.Lock()
-	defer ms.Unlock()
+	ms.mcastDataMapL.Lock()
+	defer ms.mcastDataMapL.Unlock()
 
 	ms.accessed = time.Now()
 	seqId = ms.newSeqId
@@ -111,14 +113,14 @@ func (ms *McastSeq) size() (size int) {
 }
 
 func (ms *McastSeq) Size() int {
-	ms.RLock()
-	defer ms.RUnlock()
+	ms.mcastDataMapL.RLock()
+	defer ms.mcastDataMapL.RUnlock()
 	return ms.size()
 }
 
 func (ms *McastSeq) DataCount() int {
-	ms.RLock()
-	defer ms.RUnlock()
+	ms.mcastDataMapL.RLock()
+	defer ms.mcastDataMapL.RUnlock()
 	return len(ms.mcastDataMap)
 }
 

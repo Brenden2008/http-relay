@@ -43,6 +43,10 @@ func NewServer(listener net.Listener) (server *Server) {
 	mcastCtrl := controller.NewMcastCtrl(mcastRep, server.stopChan)
 	http.HandleFunc("/mcast/", corsHandler(mcastCtrl.Conduct, []string{"Httprelay-Seqid"}))
 
+	proxyRep := repository.NewProxyRep()
+	proxyCtrl := controller.NewProxyCtrl(proxyRep, server.stopChan)
+	http.HandleFunc("/proxy/", corsHandler(proxyCtrl.Conduct, []string{}))
+
 	server.outdaters = []repository.Outdater{linkRep, mcastRep}
 	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl}
 

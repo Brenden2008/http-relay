@@ -10,7 +10,7 @@ const MaxAge = time.Minute * 20
 type comm struct {
 	accessed time.Time
 	wSecret  string
-	m        sync.RWMutex
+	l        sync.RWMutex
 	*Waiters
 }
 
@@ -22,8 +22,8 @@ func newComm() comm {
 }
 
 func (c *comm) WAuth(wSecret string) bool {
-	c.m.Lock()
-	defer c.m.Unlock()
+	c.l.Lock()
+	defer c.l.Unlock()
 
 	if c.wSecret == "" {
 		c.wSecret = wSecret
@@ -32,13 +32,13 @@ func (c *comm) WAuth(wSecret string) bool {
 }
 
 func (c *comm) Expired() bool {
-	c.m.RLock()
-	defer c.m.RUnlock()
+	c.l.RLock()
+	defer c.l.RUnlock()
 	return time.Since(c.accessed) > MaxAge && !c.Waiters.HasWaiters()
 }
 
 func (c *comm) Accessed() {
-	c.m.Lock()
-	defer c.m.Unlock()
+	c.l.Lock()
+	defer c.l.Unlock()
 	c.accessed = time.Now()
 }
