@@ -5,20 +5,38 @@ import (
 	"net/http"
 )
 
-type ProxyData struct {
+type ProxyCliData struct {
+	Method   string
 	Path     string
 	Header   *http.Header
 	Body     *buffreader.BuffReader
-	RespChan chan *ProxyData
+	RespChan chan *ProxySerData
 }
 
-func NewProxyData(r *http.Request, path string) *ProxyData {
-	br := buffreader.New(r.Body)
-	br.Buff()
-	return &ProxyData{
-		Path:     path,
-		Header:   &r.Header,
-		Body:     br,
-		RespChan: make(chan *ProxyData),
+func NewProxyCliData(r *http.Request, path string) (proxyReqData *ProxyCliData) {
+	proxyReqData = &ProxyCliData{
+		Method: r.Method,
+		Path:   path,
+		Header: &r.Header,
+		Body:   buffreader.New(r.Body),
 	}
+
+	proxyReqData.Body.Buff()
+	proxyReqData.RespChan = make(chan *ProxySerData)
+
+	return
+}
+
+type ProxySerData struct {
+	Header *http.Header
+	Body   *buffreader.BuffReader
+}
+
+func NewProxySerData(r *http.Request) (proxyRespData *ProxySerData) {
+	proxyRespData = &ProxySerData{
+		Header: &r.Header,
+		Body:   buffreader.New(r.Body),
+	}
+	proxyRespData.Body.Buff()
+	return
 }

@@ -25,6 +25,7 @@ func init() {
 }
 
 func randStr(n int) string {
+	return "12345678" // TODO: !!!!! restore
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
