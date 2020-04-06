@@ -48,13 +48,19 @@ func (pc *ProxyCtrl) transferCliReq(reqChan chan<- *model.ProxyCliData, data *mo
 func (pc *ProxyCtrl) transferCliResp(data *model.ProxyCliData, r *http.Request, w http.ResponseWriter) (err error) {
 	select {
 	case respData := <-data.RespChan:
-		status := r.Header.Get("Httprelay-Proxy-Status")
+		status := respData.Header.Get("Httprelay-Proxy-Status")
 		if statusInt, err := strconv.Atoi(status); err == nil {
 			w.WriteHeader(statusInt)
 		}
 		exclude := map[string]bool{
 			"Httprelay-Proxy-Jobid":  true,
 			"Httprelay-Proxy-Status": true,
+			"User-Agent":             true,
+			"Accept":                 true,
+			"Accept-Encoding":        true,
+			"Accept-Language":        true,
+			"Origin":                 true,
+			"Referer":                true,
 		}
 
 		if err = respData.Header.WriteSubset(w, exclude); err == nil {
