@@ -10,8 +10,11 @@ import (
 func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.ResponseWriter) {
 	if jobId := r.Header.Get("Httprelay-Proxy-Jobid"); jobId != "" {
 		if cliData, ok := ser.TakeJob(jobId); ok { // Request is previous job response /////////////////////////////////////
+			defer cliData.CloseRespChan()
+
 			serData := model.NewProxySerData(r)
 			if pc.transferSerReq(cliData.RespChan, serData, r, w) != nil {
+				serData.Body.Close() // Stopping buffering
 				//TODO: Log request transfer err
 				return
 			}
@@ -25,16 +28,13 @@ func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.R
 	pc.transferSerResp(ser, r, w)
 }
 
-func (pc *ProxyCtrl) transferSerReq(respChan chan<- *model.ProxySerData, data *model.ProxySerData, r *http.Request, w http.ResponseWriter) (err error) {
+func (pc *ProxyCtrl) transferSerReq(respChan chan<- *model.ProxySerData, serData *model.ProxySerData, r *http.Request, w http.ResponseWriter) (err error) {
 	select {
-	case respChan <- data:
-		close(respChan)
+	case respChan <- serData:
 	case <-pc.stopChan:
-		data.Body.Close() // Stopping buffering
 		w.WriteHeader(http.StatusServiceUnavailable)
 		err = errors.New("proxy controller transferReq stop signal received")
 	case <-r.Context().Done():
-		data.Body.Close() // Stopping buffering
 		w.WriteHeader(http.StatusBadGateway)
 		err = errors.New("proxy controller transferReq close signal received")
 	}

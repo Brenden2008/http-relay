@@ -32,3 +32,15 @@ func (ps *ProxySer) TakeJob(jobId string) (proxyData *ProxyCliData, ok bool) {
 	}
 	return
 }
+
+func (ps *ProxySer) RemoveJob(cliData *ProxyCliData) {
+	ps.jobMapL.Lock()
+	defer ps.jobMapL.Unlock()
+
+	for k, v := range ps.jobMap {
+		if v == cliData {
+			delete(ps.jobMap, k)
+			break
+		}
+	}
+}
