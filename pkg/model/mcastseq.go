@@ -86,7 +86,7 @@ func (ms *McastSeq) Write(data *TeeData) (seqId int) {
 }
 
 func (ms *McastSeq) preserveSize() {
-	for ms.size() > 11000000 { // Total allowed 11Mb while reqest limited 10Mb
+	for ms.size() > 11000000 { // Total allowed 11Mb while request limited 10Mb
 		ms.removeOldest()
 	}
 }

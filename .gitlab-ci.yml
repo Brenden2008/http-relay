@@ -14,6 +14,15 @@ stages:
   - image
   - deploy
 
+test:unit:
+  stage: test
+  extends: .prepare:go
+  only:
+    - tags
+
+  script:
+    - go test ./test/... -cover
+
 test:race:
   stage: test
   extends: .prepare:go

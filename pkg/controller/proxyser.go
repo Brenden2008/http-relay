@@ -9,6 +9,11 @@ import (
 )
 
 func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.ResponseWriter) {
+	if !ser.WAuth(wSecret(r)) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	if jobId := r.Header.Get("Httprelay-Proxy-Jobid"); jobId != "" {
 		fmt.Println(jobId)
 

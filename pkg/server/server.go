@@ -47,8 +47,8 @@ func NewServer(listener net.Listener) (server *Server) {
 	proxyCtrl := controller.NewProxyCtrl(proxyRep, server.stopChan)
 	http.HandleFunc("/proxy/", wildcardCorsHandler(proxyCtrl.Conduct))
 
-	server.outdaters = []repository.Outdater{linkRep, mcastRep}
-	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl}
+	server.outdaters = []repository.Outdater{linkRep, mcastRep, proxyRep}
+	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl, proxyCtrl}
 
 	return
 }

@@ -26,5 +26,16 @@ func (pr *ProxyRep) GetSer(serId string) *model.ProxySer {
 		proxySer = model.NewProxySer()
 		pr.serMap[serId] = proxySer
 	}
+	proxySer.Accessed()
 	return proxySer
+}
+
+func (pr *ProxyRep) removeOutdated() {
+	pr.serMapL.Lock()
+	defer pr.serMapL.Unlock()
+	for k, v := range pr.serMap {
+		if v.Expired() {
+			delete(pr.serMap, k)
+		}
+	}
 }

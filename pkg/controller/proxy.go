@@ -33,6 +33,8 @@ func (pc *ProxyCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 
 	pathArr := strings.Split(r.URL.Path, "/")
 	ser := pc.rep.GetSer(pathArr[2])
+	ser.AddWaiter()
+	defer ser.RemoveWaiter()
 
 	if strings.EqualFold(r.Method, "SERVE") {
 		pc.handleServer(ser, r, w)
