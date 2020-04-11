@@ -52,24 +52,23 @@ func (pc *ProxyCtrl) transferCliResp(data *model.ProxyCliData, r *http.Request, 
 		if statusInt, err := strconv.Atoi(status); err == nil {
 			w.WriteHeader(statusInt)
 		}
-		exclude := map[string]bool{
-			"Httprelay-Proxy-Jobid":  true,
-			"Httprelay-Proxy-Status": true,
-			"User-Agent":             true,
-			"Accept":                 true,
-			"Accept-Encoding":        true,
-			"Accept-Language":        true,
-			"Origin":                 true,
-			"Referer":                true,
+
+		w.Header().Add("Content-Type", respData.Header.Get("Content-Type"))
+
+		hStr := respData.Header.Get("Httprelay-Proxy-Headers")
+		hArr := strings.Split(hStr, ",")
+		for _, h := range hArr {
+			h = strings.TrimSpace(h)
+			w.Header().Set(h, respData.Header.Get(h))
 		}
 
-		if err = respData.Header.WriteSubset(w, exclude); err == nil {
-			_, err = io.Copy(w, respData.Body)
-		}
+		_, err = io.Copy(w, respData.Body)
 	case <-pc.stopChan:
+		fmt.Println("stop in transferCliResp")
 		w.WriteHeader(http.StatusServiceUnavailable)
 		err = errors.New("proxy controller transferResp stop signal received")
 	case <-r.Context().Done():
+		fmt.Println("close in transferCliResp")
 		w.WriteHeader(http.StatusBadGateway)
 		err = errors.New("proxy controller transferResp close signal received")
 	}

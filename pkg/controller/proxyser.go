@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
 	"io"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 
 func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.ResponseWriter) {
 	if jobId := r.Header.Get("Httprelay-Proxy-Jobid"); jobId != "" {
+		fmt.Println(jobId)
+
 		if cliData, ok := ser.TakeJob(jobId); ok { // Request is previous job response /////////////////////////////////////
 			defer cliData.CloseRespChan()
 
@@ -45,26 +48,30 @@ func (pc *ProxyCtrl) transferSerResp(ser *model.ProxySer, r *http.Request, w htt
 	select { // Response is new job request ////////////////////////////////////////////////////////////////////////////
 	case cliData := <-ser.ReqChan:
 		jobId := randStr(8)
-		w.Header().Add("Httprelay-Proxy-Jobid", jobId)
-		w.Header().Add("Httprelay-Proxy-Method", cliData.Method)
-		w.Header().Add("Httprelay-Proxy-Path", cliData.Path)
 
-		if err := cliData.Header.Write(w); err == nil {
-			if _, err := io.Copy(w, cliData.Body); err == nil {
-				ser.AddJob(jobId, cliData)
-			} else {
-				//TODO: Log body transfer err
-				return
+		for name, vals := range *cliData.Header {
+			for _, val := range vals {
+				w.Header().Add(name, val)
 			}
+		}
+
+		w.Header().Set("Httprelay-Proxy-Jobid", jobId)
+		w.Header().Set("Httprelay-Proxy-Method", cliData.Method)
+		w.Header().Set("Httprelay-Proxy-Path", cliData.Path)
+
+		if _, err := io.Copy(w, cliData.Body); err == nil {
+			ser.AddJob(jobId, cliData)
 		} else {
-			//TODO: Log header transfer err
+			//TODO: Log body transfer err
 			return
 		}
 
 	case <-pc.stopChan:
+		fmt.Println("stop in transferSerResp")
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	case <-r.Context().Done():
+		fmt.Println("close in transferSerResp")
 		//TODO: log
 		return
 	}

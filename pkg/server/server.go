@@ -69,7 +69,7 @@ func cors(w http.ResponseWriter, r *http.Request, expose []string) {
 		origin = "*"
 	}
 	w.Header().Set("Access-Control-Allow-Origin", origin)
-	w.Header().Set("Httprelay-Version", Version)
+	//w.Header().Set("Httprelay-Version", Version)
 
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, SERVE")
@@ -96,7 +96,7 @@ func wildcardCors(w http.ResponseWriter, r *http.Request) {
 		origin = "*"
 	}
 	w.Header().Set("Access-Control-Allow-Origin", origin)
-	w.Header().Set("Httprelay-Version", Version)
+	//w.Header().Set("Httprelay-Version", Version)
 
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, SERVE")
