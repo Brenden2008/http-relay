@@ -15,9 +15,8 @@ var serData = newString("Server data. ", 10000)
 
 const serUrl = "https://domain/proxy/123/test"
 
-func newReq(method string, url string, data string) (r *http.Request, dataStr string) {
-	dataStr = newString(data, 10000)
-	r, _ = http.NewRequest(method, url, strings.NewReader(dataStr))
+func newReq(method string, url string, data string) (r *http.Request) {
+	r, _ = http.NewRequest(method, url, strings.NewReader(data))
 	return
 }
 
@@ -26,49 +25,42 @@ func TestProxyCtrlConduct(t *testing.T) {
 	proxyRep := repository.NewProxyRep()
 	proxyCtrl := controller.NewProxyCtrl(proxyRep, stopChan)
 
-	cliCloseChan := make(chan struct{})
+	closeChan := make(chan struct{})
 	go func() {
-		proxyCtrlCliReq(t, proxyCtrl)
-		close(cliCloseChan)
+		proxyCtrlCliReq(t, proxyCtrl, closeChan)
 	}()
 
-	serCloseChan := make(chan struct{})
 	go func() {
-		proxyCtrlSerReq(t, proxyCtrl)
-		proxyCtrlSerResp(t, proxyCtrl)
-		close(serCloseChan)
+		proxyCtrlSerReqResp(t, proxyCtrl, closeChan)
 	}()
 
-	<-serCloseChan
-	<-cliCloseChan
+	<-closeChan
 }
 
-func proxyCtrlCliReq(t *testing.T, ctrl *controller.ProxyCtrl) {
-	r, _ := newReq(http.MethodPost, serUrl, cliData)
+func proxyCtrlCliReq(t *testing.T, ctrl *controller.ProxyCtrl, closeChan chan struct{}) {
+	r := newReq(http.MethodPost, serUrl, cliData)
 	w := httptest.NewRecorder()
 	ctrl.Conduct(w, r)
 	body, _ := ioutil.ReadAll(w.Body)
 	if string(body) != serData {
-		t.Fail()
+		t.Error("Client received wrong response body")
 	}
+	close(closeChan)
 }
 
-func proxyCtrlSerReq(t *testing.T, ctrl *controller.ProxyCtrl) {
-	r, _ := newReq("SERVE", serUrl, cliData)
-	w := httptest.NewRecorder()
-	ctrl.Conduct(w, r)
-	body, _ := ioutil.ReadAll(w.Body)
-	if string(body) != serData {
-		t.Fail()
+func proxyCtrlSerReqResp(t *testing.T, ctrl *controller.ProxyCtrl, closeChan chan struct{}) {
+	r1 := newReq("SERVE", serUrl, "")
+	w1 := httptest.NewRecorder()
+	ctrl.Conduct(w1, r1)
+	body, _ := ioutil.ReadAll(w1.Body)
+	if string(body) != cliData {
+		t.Error("Server received wrong client data body")
+		close(closeChan)
+		return
 	}
-}
 
-func proxyCtrlSerResp(t *testing.T, ctrl *controller.ProxyCtrl) {
-	r, _ := newReq("SERVE", serUrl, cliData)
-	w := httptest.NewRecorder()
-	ctrl.Conduct(w, r)
-	body, _ := ioutil.ReadAll(w.Body)
-	if string(body) != serData {
-		t.Fail()
-	}
+	r2 := newReq("SERVE", serUrl, serData)
+	r2.Header.Add("httprelay-proxy-jobid", w1.Header().Get("httprelay-proxy-jobid"))
+	w2 := httptest.NewRecorder()
+	ctrl.Conduct(w2, r2)
 }

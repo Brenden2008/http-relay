@@ -22,6 +22,7 @@ func (pc *ProxyCtrl) handleClient(ser *model.ProxySer, pathArr []string, r *http
 	defer cliData.CloseRespChan() // Marking cliData as no longer needed to avoid adding to job map
 
 	if pc.transferCliReq(ser.ReqChan, cliData, r, w) == nil {
+		r.Body.Close()
 		if pc.transferCliResp(cliData, r, w) != nil {
 			//TODO: Log err
 			return
