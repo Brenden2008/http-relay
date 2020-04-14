@@ -65,7 +65,6 @@ func cors(w http.ResponseWriter, r *http.Request, expose []string) {
 		origin = "*"
 	}
 	w.Header().Set("Access-Control-Allow-Origin", origin)
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Httprelay-Version", Version)
 
 	if r.Method == "OPTIONS" {
