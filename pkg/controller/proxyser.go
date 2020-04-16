@@ -16,7 +16,6 @@ func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.R
 
 	if jobId := r.Header.Get("Httprelay-Proxy-Jobid"); jobId != "" {
 		fmt.Println(jobId)
-
 		if cliData, ok := ser.TakeJob(jobId); ok { // Request is previous job response /////////////////////////////////////
 			defer cliData.CloseRespChan()
 
