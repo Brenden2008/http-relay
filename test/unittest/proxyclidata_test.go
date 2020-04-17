@@ -1,24 +1,24 @@
 package unittest
 
 import (
+	"bytes"
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 	"time"
 )
 
-func newProxyCliData() (proxyCliData *model.ProxyCliData, r *http.Request, dataStr string, path string) {
-	dataStr = newString("A", 10000)
+func newProxyCliData() (proxyCliData *model.ProxyCliData, r *http.Request, data []byte, path string) {
+	data = bytes.Repeat([]byte{10}, 10000)
 	path = "/123/test"
-	r, _ = http.NewRequest(http.MethodPost, "https://domain/proxy/123/test", strings.NewReader(dataStr))
+	r, _ = http.NewRequest(http.MethodPost, "https://domain/proxy/123/test", bytes.NewReader(data))
 	proxyCliData = model.NewProxyCliData(r, path)
 	return
 }
 
 func TestNewProxyCliData(t *testing.T) {
-	pcd, r, dataStr, path := newProxyCliData()
+	pcd, r, data, path := newProxyCliData()
 
 	if pcd.Method != http.MethodPost {
 		t.Fail()
@@ -33,7 +33,7 @@ func TestNewProxyCliData(t *testing.T) {
 	}
 
 	if b, err := ioutil.ReadAll(pcd.Body); err == nil {
-		if string(b) != dataStr {
+		if bytes.Compare(b, data) != 0 {
 			t.Fail()
 		}
 	} else {

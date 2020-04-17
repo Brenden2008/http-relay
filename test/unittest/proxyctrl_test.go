@@ -1,6 +1,7 @@
 package unittest
 
 import (
+	"bytes"
 	"gitlab.com/jonas.jasas/httprelay/test/testlib"
 	"net/http"
 	"testing"
@@ -9,23 +10,23 @@ import (
 const serUrl = "https://domain/proxy/123/test"
 const serPath = "/test"
 
-var cliData1 = newString("Client data 1. ", 10000)
-var cliData2 = newString("Client data 2. ", 10000)
-var serData1 = newString("Server data 1. ", 10000)
-var serData2 = newString("Server data 2. ", 10000)
+var cliData1 = newData("Client data 1. ", 10000)
+var cliData2 = newData("Client data 2. ", 10000)
+var serData1 = newData("Server data 1. ", 10000)
+var serData2 = newData("Server data 2. ", 10000)
 
 func TestProxyCtrlConduct(t *testing.T) {
 	proxyCtrl, _, closeChan := testlib.NewProxyCtrl()
 	go func() {
 		defer close(closeChan)
-		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, cliData1)
+		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, bytes.NewReader(cliData1))
 		if !testlib.RespDataEq(resp.Body, serData1) {
 			t.Error("Client received wrong response body")
 		}
 	}()
 	go func() {
 		defer close(closeChan)
-		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, "", "", "")
+		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader([]byte{}), "", "")
 		if resp.Header().Get("httprelay-proxy-path") != serPath {
 			t.Error("Server received wrong path")
 			return
@@ -34,7 +35,7 @@ func TestProxyCtrlConduct(t *testing.T) {
 			t.Error("Server received wrong client data body")
 			return
 		}
-		testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, serData1, jobId, "")
+		testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader(serData1), jobId, "")
 	}()
 	<-closeChan
 }
@@ -43,12 +44,12 @@ func TestProxyCtrlWSecret(t *testing.T) {
 	proxyCtrl, _, closeChan := testlib.NewProxyCtrl()
 	go func() {
 		defer close(closeChan)
-		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, cliData1)
+		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, bytes.NewReader(cliData1))
 		if !testlib.RespDataEq(resp.Body, serData1) {
 			t.Error("Client received wrong response body")
 			return
 		}
-		resp = testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, cliData2)
+		resp = testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, bytes.NewReader(cliData2))
 		if !testlib.RespDataEq(resp.Body, serData2) {
 			t.Error("Client received wrong response body")
 			return
@@ -59,31 +60,31 @@ func TestProxyCtrlWSecret(t *testing.T) {
 		const goodSecret = "secret1"
 		const badSecret = "bad secret"
 		defer close(closeChan)
-		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, "", "", goodSecret)
+		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader([]byte{}), "", goodSecret)
 		if !testlib.RespDataEq(resp.Body, cliData1) {
 			t.Error("Server received wrong client data body")
 			return
 		}
 
-		resp, _ = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, serData1, jobId, badSecret)
+		resp, _ = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader(serData1), jobId, badSecret)
 		if resp.Code != http.StatusUnauthorized {
 			t.Error("Server is accessing unauthorized data channel with the bad secret")
 			return
 		}
 
-		resp, jobId = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, serData1, jobId, goodSecret)
+		resp, jobId = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader(serData1), jobId, goodSecret)
 		if !testlib.RespDataEq(resp.Body, cliData2) {
 			t.Error("Server received wrong client data body")
 			return
 		}
 
-		resp, _ = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, serData1, jobId, badSecret)
+		resp, _ = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader(serData1), jobId, badSecret)
 		if resp.Code != http.StatusUnauthorized {
 			t.Error("Server is accessing unauthorized data channel with the bad secret")
 			return
 		}
 
-		resp, jobId = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, serData2, jobId, goodSecret)
+		resp, jobId = testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader(serData2), jobId, goodSecret)
 	}()
 	<-closeChan
 }
@@ -116,7 +117,7 @@ func TestProxyCtrlHeaders(t *testing.T) {
 
 	go func() {
 		defer close(closeChan)
-		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, cliHeader, cliData1)
+		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, cliHeader, bytes.NewReader(cliData1))
 		if !testlib.RespDataEq(resp.Body, serData1) {
 			t.Error("Client received wrong response body")
 		}
@@ -136,7 +137,7 @@ func TestProxyCtrlHeaders(t *testing.T) {
 
 	go func() {
 		defer close(closeChan)
-		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, "", "", "")
+		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader([]byte{}), "", "")
 		if !testlib.RespDataEq(resp.Body, cliData1) {
 			t.Error("Server received wrong client data body")
 			return
@@ -147,7 +148,7 @@ func TestProxyCtrlHeaders(t *testing.T) {
 				return
 			}
 		}
-		testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, serHeader, serData1, jobId, "")
+		testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, serHeader, bytes.NewReader(serData1), jobId, "")
 	}()
 	<-closeChan
 }

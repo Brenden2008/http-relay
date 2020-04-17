@@ -1,14 +1,14 @@
 package testlib
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
-func newReq(method string, url string, header map[string]string, data string) (r *http.Request) {
-	r, _ = http.NewRequest(method, url, strings.NewReader(data))
+func newReq(method string, url string, header map[string]string, dataReader io.Reader) (r *http.Request) {
+	r, _ = http.NewRequest(method, url, dataReader)
 	if header != nil {
 		for k, v := range header {
 			r.Header.Add(k, v)
@@ -17,7 +17,7 @@ func newReq(method string, url string, header map[string]string, data string) (r
 	return
 }
 
-func RespDataEq(body io.Reader, data string) bool {
+func RespDataEq(body io.Reader, data []byte) bool {
 	respData, _ := ioutil.ReadAll(body)
-	return string(respData) == data
+	return bytes.Compare(respData, data) == 0
 }

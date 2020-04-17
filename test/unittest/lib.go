@@ -7,12 +7,12 @@ package unittest
 //	return
 //}
 
-func newString(s string, count int) string {
-	b := make([]byte, len(s)*count)
+func newData(s string, count int) (b []byte) {
+	b = make([]byte, len(s)*count)
 	bp := copy(b, s)
 	for bp < len(b) {
 		copy(b[bp:], b[:bp])
 		bp *= 2
 	}
-	return string(b)
+	return
 }

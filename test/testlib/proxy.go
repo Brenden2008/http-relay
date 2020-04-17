@@ -3,6 +3,7 @@ package testlib
 import (
 	"gitlab.com/jonas.jasas/httprelay/pkg/controller"
 	"gitlab.com/jonas.jasas/httprelay/pkg/repository"
+	"io"
 	"net/http"
 	"net/http/httptest"
 )
@@ -15,15 +16,15 @@ func NewProxyCtrl() (proxyCtrl *controller.ProxyCtrl, stopChan chan struct{}, cl
 	return
 }
 
-func ProxyCtrlCliReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, data string) *httptest.ResponseRecorder {
-	r := newReq(http.MethodPost, url, header, data)
+func ProxyCtrlCliReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, dataReader io.Reader) *httptest.ResponseRecorder {
+	r := newReq(http.MethodPost, url, header, dataReader)
 	w := httptest.NewRecorder()
 	ctrl.Conduct(w, r)
 	return w
 }
 
-func ProxyCtrlSerReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, data string, reqJobId string, wSecret string) (resp *httptest.ResponseRecorder, respJobId string) {
-	r := newReq("SERVE", url, header, data)
+func ProxyCtrlSerReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, dataReader io.Reader, reqJobId string, wSecret string) (resp *httptest.ResponseRecorder, respJobId string) {
+	r := newReq("SERVE", url, header, dataReader)
 	r.Header.Add("httprelay-proxy-jobid", reqJobId)
 	r.Header.Add("httprelay-wsecret", wSecret)
 	w := httptest.NewRecorder()
