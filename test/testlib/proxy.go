@@ -18,6 +18,7 @@ func NewProxyCtrl() (proxyCtrl *controller.ProxyCtrl, stopChan chan struct{}, cl
 
 func ProxyCtrlCliReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, dataReader io.Reader) *httptest.ResponseRecorder {
 	r := newReq(http.MethodPost, url, header, dataReader)
+	defer r.Body.Close()
 	w := httptest.NewRecorder()
 	ctrl.Conduct(w, r)
 	return w
@@ -25,6 +26,7 @@ func ProxyCtrlCliReq(ctrl *controller.ProxyCtrl, url string, header map[string]s
 
 func ProxyCtrlSerReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, dataReader io.Reader, reqJobId string, wSecret string) (resp *httptest.ResponseRecorder, respJobId string) {
 	r := newReq("SERVE", url, header, dataReader)
+	defer r.Body.Close()
 	r.Header.Add("httprelay-proxy-jobid", reqJobId)
 	r.Header.Add("httprelay-wsecret", wSecret)
 	w := httptest.NewRecorder()
