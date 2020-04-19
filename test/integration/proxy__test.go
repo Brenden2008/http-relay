@@ -3,6 +3,7 @@ package integration
 import (
 	"bytes"
 	"fmt"
+	"gitlab.com/jonas.jasas/closechan"
 	"gitlab.com/jonas.jasas/httprelay/pkg/controller"
 	"gitlab.com/jonas.jasas/httprelay/test/testlib"
 	"gitlab.com/jonas.jasas/rwmock"
@@ -20,27 +21,28 @@ func TestProxy(t *testing.T) {
 	servers := []string{"first", "second", "third", "fourth", "fifth"}
 	proxyData := genProxyData()
 	ctrl, _, _ := testlib.NewProxyCtrl()
-	closeChan := make(chan struct{})
+	closeChan := closechan.NewCloseChan()
 	var wg sync.WaitGroup
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			runProxyCliReq(t, ctrl, servers, proxyData, closeChan)
-			t.Log("Client done")
 			wg.Done()
 		}()
 	}
 
-	for _, server := range servers {
-		go func(ser string) {
-			runProxySerReq(t, ctrl, ser, proxyData, closeChan)
-			close(closeChan)
-		}(server)
+	for i := 0; i < 5; i++ {
+		for _, server := range servers {
+			go func(ser string) {
+				runProxySerReq(t, ctrl, ser, proxyData, closeChan)
+				closeChan.Close()
+			}(server)
+		}
 	}
 
 	wg.Wait()
-	//close(stopChan)
+	closeChan.Close()
 }
 
 func genProxyData() (data proxyTestData) {
@@ -53,61 +55,46 @@ func genProxyData() (data proxyTestData) {
 	return
 }
 
-func runProxyCliReq(t *testing.T, proxyCtrl *controller.ProxyCtrl, servers []string, data proxyTestData, closeChan chan struct{}) {
-	for i := 0; i < 10; i++ {
+func runProxyCliReq(t *testing.T, proxyCtrl *controller.ProxyCtrl, servers []string, data proxyTestData, closeChan *closechan.CloseChan) {
+	for i := 0; i < 20; i++ {
 		for _, ser := range servers {
 			w, path := newProxyCliReq(proxyCtrl, data, ser)
-			select {
-			case <-closeChan:
+			if closeChan.Closed() {
 				return
-			default:
 			}
 			if w.Header().Get("test-path") != path {
 				t.Error("client received incorrect path in response")
-				close(closeChan)
 				return
 			}
 			if dataIdx, err := strconv.Atoi(w.Header().Get("test-data-idx")); err == nil {
-				if testlib.RespDataEq(w.Body, data[dataIdx]) {
+				if !testlib.RespDataEq(w.Body, data[dataIdx]) {
 					t.Error("client received incorrect body in response")
-					close(closeChan)
 					return
 				}
 			} else {
 				t.Error("client received incorrect data array index")
-				close(closeChan)
 				return
 			}
 		}
 	}
 }
 
-func runProxySerReq(t *testing.T, proxyCtrl *controller.ProxyCtrl, server string, data proxyTestData, closeChan chan struct{}) {
-	path, jobId  := "", ""
+func runProxySerReq(t *testing.T, proxyCtrl *controller.ProxyCtrl, server string, data proxyTestData, closeChan *closechan.CloseChan) {
+	path, jobId := "", ""
 	var w *httptest.ResponseRecorder
-	for {
-		t.Log("Server req")
+	for !closeChan.Closed() {
 		w, jobId = newProxySerReq(proxyCtrl, data, server, path, jobId)
-		t.Log("Server received req")
 		path = w.Header().Get("test-path")
 		jobId = w.Header().Get("httprelay-proxy-jobid")
 
 		if dataIdx, err := strconv.Atoi(w.Header().Get("test-data-idx")); err == nil {
-			if testlib.RespDataEq(w.Body, data[dataIdx]) {
+			if !testlib.RespDataEq(w.Body, data[dataIdx]) {
 				t.Error("server received incorrect body in response")
-				close(closeChan)
 				return
 			}
 		} else {
 			t.Error("server received incorrect data array index")
-			close(closeChan)
 			return
-		}
-
-		select {
-		case <-closeChan:
-			return
-		default:
 		}
 	}
 }
@@ -121,7 +108,7 @@ func newProxyCliReq(proxyCtrl *controller.ProxyCtrl, data proxyTestData, ser str
 		"test-data-idx": strconv.Itoa(dataIdx),
 	}
 
-	r := rwmock.NewShaperRand(bytes.NewReader(data[dataIdx]), 1, len(data[dataIdx]), 0, time.Second)
+	r := rwmock.NewShaperRand(bytes.NewReader(data[dataIdx]), 1, len(data[dataIdx]), 0, time.Millisecond)
 	w = testlib.ProxyCtrlCliReq(proxyCtrl, url, header, r)
 	return
 }
@@ -135,7 +122,7 @@ func newProxySerReq(proxyCtrl *controller.ProxyCtrl, data proxyTestData, ser, pa
 		"test-data-idx":           strconv.Itoa(dataIdx),
 	}
 
-	r := rwmock.NewShaperRand(bytes.NewReader(data[dataIdx]), 1, len(data[dataIdx]), 0, time.Second)
+	r := rwmock.NewShaperRand(bytes.NewReader(data[dataIdx]), 1, len(data[dataIdx]), 0, time.Millisecond)
 	w, respJobId = testlib.ProxyCtrlSerReq(proxyCtrl, url, header, r, jobId, "")
 	return
 }

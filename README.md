@@ -1,10 +1,10 @@
 # HTTP Relay
 HTTP client to client (web browser to web browser) communication
 
-***IMPORTANT!!!***
-_Due to increased service usage and user requests Httprelay.io is moving from SaS to OSS.
-Service that is accessible at https://httprelay.io is **going to be moved on 2019-11-10** to https://demo.httprelay.io.
-Please use your own deployments as https://demo.httprelay.io for demonstration purpose only!_ 
+[![go report card](https://goreportcard.com/badge/gitlab.com/jonas.jasas/httprelay)](https://goreportcard.com/report/gitlab.com/jonas.jasas/httprelay)
+[![pipeline status](https://gitlab.com/jonas.jasas/httprelay/badges/master/pipeline.svg)](https://gitlab.com/jonas.jasas/httprelay/commits/master)
+[![coverage report](https://gitlab.com/jonas.jasas/httprelay/badges/master/coverage.svg)](https://gitlab.com/jonas.jasas/httprelay/commits/master)
+[![godoc](https://godoc.org/gitlab.com/jonas.jasas/httprelay?status.svg)](http://godoc.org/gitlab.com/jonas.jasas/httprelay)
 
 ## Features
 - Communication with old good and simple HTTP requests (supported by all web browsers and most platforms) 
