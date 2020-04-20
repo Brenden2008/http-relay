@@ -111,14 +111,14 @@ build:docker:img:
     - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
     - docker push $CONTAINER_IMAGE
 
-#pages:
-#  stage: deploy
-#  image: alpine:latest
-##  only:
-##    refs:
-##      - master
-#  script:
-#    - echo 'Nothing to do...'
-#  artifacts:
-#    paths:
-#      - public
+pages:
+  stage: deploy
+  image: alpine:latest
+#  only:
+#    refs:
+#      - master
+  script:
+    - echo 'Nothing to do...'
+  artifacts:
+    paths:
+      - public

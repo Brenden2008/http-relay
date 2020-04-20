@@ -1,16 +1,12 @@
 # HTTP Relay
 HTTP client to client (web browser to web browser) communication
 
-[![go report card](https://goreportcard.com/badge/gitlab.com/jonas.jasas/httprelay)](https://goreportcard.com/report/gitlab.com/jonas.jasas/httprelay)
-[![pipeline status](https://gitlab.com/jonas.jasas/httprelay/badges/master/pipeline.svg)](https://gitlab.com/jonas.jasas/httprelay/commits/master)
-[![coverage report](https://gitlab.com/jonas.jasas/httprelay/badges/master/coverage.svg)](https://gitlab.com/jonas.jasas/httprelay/commits/master)
-[![godoc](https://godoc.org/gitlab.com/jonas.jasas/httprelay?status.svg)](http://godoc.org/gitlab.com/jonas.jasas/httprelay)
-
 ## Features
-- Communication with old good and simple HTTP requests (supported by all web browsers and most platforms) 
+- Communication using HTTP requests (supported by the all web browsers and most platforms)
 - Synchronous bidirectional data exchange
 - Synchronous one directional data transfer
-- Asynchronous and buffered one to many data transfer 
+- Asynchronous and buffered one to many data transfer
+- Client as a server communication method
 - Communication channel ownership
 
 ## Installation
