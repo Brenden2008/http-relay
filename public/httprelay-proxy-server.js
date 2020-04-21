@@ -60,7 +60,7 @@ export default class Httprelay {
             func: route.handler,
             params: path.match(route.path).slice(1)
         } : {
-            func: this.notFoundHandler,
+            func: this.notFoundHandler(route.path),
             params: []
         }
     }
@@ -114,7 +114,7 @@ export default class Httprelay {
         this.addRoute('POST', path, handler)
     }
 
-    notFoundHandler() {
-        return new Response('Not found :~(', { status: 404 })
+    notFoundHandler(path) {
+        return new Response(`Not route "${path}" handler found for the server "${this.serverId}"`, { status: 404 })
     }
 }
