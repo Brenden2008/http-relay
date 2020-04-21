@@ -118,38 +118,3 @@ class Httprelay {
         return new Response('Not found :~(', { status: 404 })
     }
 }
-
-let hr = new Httprelay('jsf')
-
-hr.get('/vienas/:n', (req, params) => {
-    console.log('vienas', params)
-    req.text().then(console.log)
-    //return new Response(`RESPONSAS!!! ${params[0]}`, {status: 222})
-    return fetch('https://httpbin.org/get').then()
-
-    // return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //         resolve(new Response(`RESPONSAS!!! ${params[0]}`, {status: 222}))
-    //     }, 3000)
-    // })
-
-})
-
-hr.post('/du/:n', (req, params) => {
-    console.log('du', params)
-    req.text().then(console.log)
-    //return new Response(`RESPONSAS!!! ${params[0]}`, {status: 222})
-    //return fetch('https://httpbin.org/get').then()
-
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log('sulaukta')
-            resolve(new Response(`RESPONSAS!!! ${params[0]}`, {status: 222}))
-        }, 3000)
-    })
-
-})
-
-hr.start()
-
-//setTimeout(() => hr.stop(), 5000)
