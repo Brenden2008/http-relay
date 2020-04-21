@@ -1,4 +1,4 @@
-class Httprelay {
+export default class Httprelay {
     constructor(serverId, proxyUrl='https://staging.httprelay.io/proxy') {
         // WARNING!!! State is shared between parallel requests!
         this.serverId = serverId

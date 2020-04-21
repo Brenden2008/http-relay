@@ -20,7 +20,9 @@ func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.R
 
 			serData := model.NewProxySerData(r)
 			if pc.transferSerReq(cliData.RespChan, serData, r, w) != nil {
-				_ = serData.Body.Close() // Stopping buffering
+				if serData.Body.Close() != nil { // Stopping buffering
+					//TODO: Log buffering error (to silence compiler warnings)
+				}
 				//TODO: Log request transfer err
 				return
 			}
