@@ -65,11 +65,11 @@ func (pc *ProxyCtrl) transferCliResp(data *model.ProxyCliData, r *http.Request, 
 
 		_, err = io.Copy(w, respData.Body)
 	case <-pc.stopChan:
-		fmt.Println("stop in transferCliResp")
+		//fmt.Println("stop in transferCliResp")
 		w.WriteHeader(http.StatusServiceUnavailable)
 		err = errors.New("proxy controller transferResp stop signal received")
 	case <-r.Context().Done():
-		fmt.Println("close in transferCliResp")
+		//fmt.Println("close in transferCliResp")
 		w.WriteHeader(http.StatusBadGateway)
 		err = errors.New("proxy controller transferResp close signal received")
 	}

@@ -11,10 +11,8 @@ export default class Httprelay {
     }
 
     start(parallel=4) {
-        for(let i=0; i<parallel; i++){
-            this.serve()
-        }
-        window.addEventListener('beforeunload', () => this.stop());
+        if (typeof window !== 'undefined') window.addEventListener('beforeunload', () => this.stop())
+        for (let i=0; i<parallel; i++) this.serve()
     }
 
     stop() {
@@ -60,7 +58,9 @@ export default class Httprelay {
             func: route.handler,
             params: path.match(route.path).slice(1)
         } : {
-            func: this.notFoundHandler(route.path),
+            func: function() {
+                return new Response(`Not handler for the "${method} ${path}" route on "${this.serverId}" server.`, { status: 404 })
+            },
             params: []
         }
     }
@@ -112,9 +112,5 @@ export default class Httprelay {
 
     post(path, handler) {
         this.addRoute('POST', path, handler)
-    }
-
-    notFoundHandler(path) {
-        return new Response(`Not route "${path}" handler found for the server "${this.serverId}"`, { status: 404 })
     }
 }

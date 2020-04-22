@@ -52,6 +52,7 @@ func (pc *ProxyCtrl) transferSerReq(respChan chan<- *model.ProxySerData, serData
 func (pc *ProxyCtrl) transferSerResp(ser *model.ProxySer, r *http.Request, w http.ResponseWriter) {
 	select { // Response is new job request ////////////////////////////////////////////////////////////////////////////
 	case cliData := <-ser.ReqChan:
+		//fmt.Println("bob received transferSerResp")
 		jobId := randStr(8)
 
 		for name, vals := range *cliData.Header {
