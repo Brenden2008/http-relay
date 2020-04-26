@@ -37,7 +37,7 @@ export default class Httprelay {
     }
 
     handle(resp, handlerFunc, handlerParams) {
-        let respPro = handlerFunc(this.respToHandlerReq(resp), handlerParams)     // User can return promise or response
+        let respPro = handlerFunc(handlerParams, this.respToHandlerReq(resp))     // User can return promise or response
         return Promise.resolve(respPro)
             .then(r => this.respToCliReqInit(r))
             .then(req => {
