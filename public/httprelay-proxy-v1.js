@@ -22,7 +22,6 @@ export default class Httprelay {
     serve(init=this.newCliReqInit()) {
         if (!this.abortSig.aborted) {
             fetch(this.url, init).then(resp => {
-                console.log(resp.status)
                 if (resp.status === 200) {
                     this.errRetry = 0
                     let method = resp.headers.get('httprelay-proxy-method')
@@ -33,10 +32,7 @@ export default class Httprelay {
                 } else {
                     this.handleError()
                 }
-            }, (err) => {
-                console.log('Fetch err ', err)
-                this.handleError(init)
-            })
+            }, (err) => this.handleError(init))
         }
     }
 
