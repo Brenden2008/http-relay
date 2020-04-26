@@ -49,11 +49,6 @@ func (pc *ProxyCtrl) transferCliReq(reqChan chan<- *model.ProxyCliData, data *mo
 func (pc *ProxyCtrl) transferCliResp(data *model.ProxyCliData, r *http.Request, w http.ResponseWriter) (err error) {
 	select {
 	case respData := <-data.RespChan:
-		status := respData.Header.Get("Httprelay-Proxy-Status")
-		if statusInt, err := strconv.Atoi(status); err == nil {
-			w.WriteHeader(statusInt)
-		}
-
 		w.Header().Add("Content-Type", respData.Header.Get("Content-Type"))
 
 		hStr := respData.Header.Get("Httprelay-Proxy-Headers")
@@ -61,6 +56,11 @@ func (pc *ProxyCtrl) transferCliResp(data *model.ProxyCliData, r *http.Request, 
 		for _, h := range hArr {
 			h = strings.TrimSpace(h)
 			w.Header().Set(h, respData.Header.Get(h))
+		}
+
+		status := respData.Header.Get("Httprelay-Proxy-Status")
+		if statusInt, err := strconv.Atoi(status); err == nil {
+			w.WriteHeader(statusInt)
 		}
 
 		_, err = io.Copy(w, respData.Body)

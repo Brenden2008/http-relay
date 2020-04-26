@@ -118,16 +118,20 @@ export default class Httprelay {
         this.addRoute('POST', path, handler)
     }
 
+    documentResponse(document) {
+        return new Response(new XMLSerializer().serializeToString(document), {
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+        })
+    }
+
     fileResponse(file, download = true) {
-        let init = {
-            header: {
+        return new Response(file, {
+            headers: {
                 'Httprelay-Proxy-Headers': 'Content-Disposition',
                 'Content-Type': file.type,
                 'Content-Disposition': `${download ? 'attachment' : 'inline'}; filename*=${this.encode(file.name)}`
             }
-        }
-        console.log(init)
-        return new Response(file, init)
+        })
     }
 
     encode(str) {
