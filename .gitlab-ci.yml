@@ -17,8 +17,8 @@ stages:
 test:unit:
   stage: test
   extends: .prepare:go
-#  only:
-#    - tags
+  only:
+    - tags
 
   script:
     - go test ./test/unittest/... -cover
@@ -26,8 +26,8 @@ test:unit:
 test:race:
   stage: test
   extends: .prepare:go
-#  only:
-#    - tags
+  only:
+    - tags
 
   script:
     - go build --race ./cmd/...
@@ -35,8 +35,8 @@ test:race:
 test:integration:
   stage: test
   extends: .prepare:go
-#  only:
-#    - tags
+  only:
+    - tags
 
   script:
     - go test ./test/integration/...

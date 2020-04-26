@@ -113,4 +113,29 @@ export default class Httprelay {
     post(path, handler) {
         this.addRoute('POST', path, handler)
     }
+
+    fileResponse(file, download = true) {
+        return new Response(file,
+            {
+                headers: {
+                    'Content-Type': file.type,
+                    'Content-Disposition': `${download ? 'attachment' : 'inline'}; filename*=${this.encode(file.name)}`
+                }
+            }
+        )
+    }
+
+    encode(str) {
+        return `UTF-8''` +
+            encodeURIComponent(str)
+                .replace(/['()]/g,
+                    function(match) {
+                        return '%' + match.charCodeAt(0).toString(16);
+                    })
+                .replace(/\*/g, '%2A')
+                .replace(/%(7C|60|5E)/g,
+                    function(_, match) {
+                        return String.fromCharCode(parseInt(match, 16));
+                    });
+    }
 }
