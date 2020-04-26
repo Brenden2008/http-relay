@@ -117,7 +117,7 @@ export default class Httprelay {
     fileResponse(file, download = true) {
         return new Response(file,
             {
-                headers: {
+                header: {
                     'Httprelay-Proxy-Headers': 'Content-Disposition',
                     'Content-Type': file.type,
                     'Content-Disposition': `${download ? 'attachment' : 'inline'}; filename*=${this.encode(file.name)}`
