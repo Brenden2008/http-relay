@@ -30,9 +30,9 @@ export default class Httprelay {
                     this.handle(resp, handler.func, handler.params)
                         .then(req => this.serve(req))
                 } else {
-                    this.handleError()
+                    this.handleError(`Httprelay responded ${resp.status} while returning result and requesting new job`)
                 }
-            }, (err) => this.handleError(init))
+            }, err => this.handleError(err, init))
         }
     }
 
@@ -46,9 +46,10 @@ export default class Httprelay {
             })
     }
 
-    handleError(init=this.newCliReqInit()) {
+    handleError(err, init=this.newCliReqInit()) {
         if (!this.abortSig.aborted) {
             setTimeout(() => this.serve(init), this.errRetry++ * 1000)
+            throw err
         }
     }
 
@@ -79,22 +80,35 @@ export default class Httprelay {
         }
     }
 
-    respToCliReqInit(resp) {
-        return resp.arrayBuffer().then(body => {
-            let init =  this.newCliReqInit()
-            init.headers = new Headers(resp.headers)
-            init.headers.set('httprelay-proxy-status', resp.status || 200)
-            init.body = body
-            return init
-        })
-    }
-
-    newCliReqInit() {
+    newCliReqInit(status = 200, headers = {}, body = null) {
+        let newHeaders = new Headers(headers)
+        newHeaders.set('httprelay-proxy-status', status)
         return {
             method: 'SERVE',
-            keepalive: true,
+            headers: newHeaders,
+            body: body,
             signal: this.abortSig
         }
+    }
+
+    respToCliReqInit(resp) {
+        return resp instanceof Response
+            ? resp.arrayBuffer().then(body => this.newCliReqInit(resp.status, resp.headers, body))
+            : resp
+    }
+
+    documentResponse(document, status = 200, headers = {}) {
+        let newHeaders = new Headers(headers)
+        newHeaders.set('Content-Type', 'text/html; charset=UTF-8')
+        return this.newCliReqInit(status, newHeaders, new XMLSerializer().serializeToString(document))
+    }
+
+    fileResponse(file, download = true, status = 200, headers = {}) {
+        let newHeaders = new Headers(headers)
+        newHeaders.set('Content-Type', file.type)
+        newHeaders.set('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename*=${this.encode(file.name)}`)
+        newHeaders.set('Httprelay-Proxy-Headers', 'Content-Disposition')
+        return this.newCliReqInit(status, newHeaders, file)
     }
 
     addRoute(method, path, handler) {
@@ -112,22 +126,6 @@ export default class Httprelay {
 
     post(path, handler) {
         this.addRoute('POST', path, handler)
-    }
-
-    documentResponse(document) {
-        return new Response(new XMLSerializer().serializeToString(document), {
-            headers: { 'Content-Type': 'text/html; charset=UTF-8' }
-        })
-    }
-
-    fileResponse(file, download = true) {
-        return new Response(file, {
-            headers: {
-                'Httprelay-Proxy-Headers': 'Content-Disposition',
-                'Content-Type': file.type,
-                'Content-Disposition': `${download ? 'attachment' : 'inline'}; filename*=${this.encode(file.name)}`
-            }
-        })
     }
 
     encode(str) {
