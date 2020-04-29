@@ -1,7 +1,11 @@
-export default class SerResponse {
+REFACTOR TO CONTEXT!!!
+
+export default class HttprelaySerResponse {
     constructor(wSecret, abortSig) {
         this._wSecret = wSecret
         this._abortSig = abortSig
+        this._headers = {}
+        this._body = null
     }
 
     respond(result, meta={}) {
@@ -40,12 +44,12 @@ export default class SerResponse {
         if (!this._headers.has('content-type')) this._headers.append('content-type', defaultContentType)
         if (!this._headers.has('content-disposition')) this._headers.append('content-disposition', defaultContentDisposition)
 
-        // Whitelisting headers that must be passed to client
         let headerWhitelist = Array.from(this._headers).map(h => h[0]).join(', ')
-        this._headers.set('httprelay-proxy-headers', headerWhitelist)
-
+        this._headers.set('httprelay-proxy-headers', headerWhitelist) // Whitelisting headers that must be passed to client
         this._headers.set('httprelay-proxy-status', meta.status || defaultStatus)
-        if (this._wSecret) this.headers.set('httprelay-wsecret', this._wSecret)
+        if (this._wSecret) this._headers.set('httprelay-wsecret', this._wSecret)
+
+        return this
     }
 
     _encode(str) {

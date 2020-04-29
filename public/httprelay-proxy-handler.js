@@ -1,4 +1,4 @@
-import SerResponse from './httprelay-proxy-ser-response'
+import HttprelaySerResponse from './httprelay-proxy-ser-response'
 
 export default class HttprelayHandler {
     constructor(func, wSecret, abortSig) {
@@ -8,17 +8,16 @@ export default class HttprelayHandler {
     }
 
     execute(resp, params) {
-        let jonId = resp.headers.get('httprelay-proxy-jobid')
-        let serResp = new SerResponse(this._wSecret, this._abortSig)
-        let respPro = this._handlerFunc(this._respToHandlerReq(resp, params, serResp))     // User can return promise or response
+        let serReq = this._respToHandlerReq(resp)
+        let serResp = new HttprelaySerResponse(this._wSecret, this._abortSig)
+        let handlerResult = this._handlerFunc(serReq, params, serResp)     // Handler can return promise
 
-        return Promise.resolve(respPro)
-            .then(r => r instanceof hrResponse ? r : new hrResponse(r) )
-            .then(r => {
-            })
-            .then(req => {
-                req.headers.set('httprelay-proxy-jobid', resp.headers.get('httprelay-proxy-jobid'))
-                return req
+        return Promise.resolve(handlerResult)
+            .then(r => r instanceof HttprelaySerResponse ? r : serResp.respond(r) )
+            .then(sr => sr.reqInitPro)
+            .then(init => {
+                init.headers.set('httprelay-proxy-jobid', resp.headers.get('httprelay-proxy-jobid'))
+                return init
             })
     }
 
