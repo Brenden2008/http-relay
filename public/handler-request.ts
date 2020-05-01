@@ -1,26 +1,26 @@
 namespace HttpRelay.Proxy {
-    class HandlerRequest {
+    export class HandlerRequest {
         constructor(private readonly response: Response) {
         }
 
-        get url(): string | null {
-            return this.response.headers.get('HttpRelay-Proxy-Url')
+        get url(): string {
+            return this.headerValue('HttpRelay-Proxy-Url')
         }
 
-        get method(): string | null {
-            return this.response.headers.get('HttpRelay-Proxy-Method')
+        get method(): string {
+            return this.headerValue('HttpRelay-Proxy-Method')
         }
 
-        get scheme(): string | null {
-            return this.response.headers.get('HttpRelay-Proxy-Scheme')
+        get scheme(): string {
+            return this.headerValue('HttpRelay-Proxy-Scheme')
         }
 
-        get host(): string | null {
-            return this.response.headers.get('HttpRelay-Proxy-Host')
+        get host(): string {
+            return this.headerValue('HttpRelay-Proxy-Host')
         }
 
-        get path(): string | null {
-            return this.response.headers.get('HttpRelay-Proxy-Path')
+        get path(): string {
+            return this.headerValue('HttpRelay-Proxy-Path')
         }
 
         get query(): string | null {
@@ -61,6 +61,12 @@ namespace HttpRelay.Proxy {
 
         public text(): Promise<string> {
             return this.response.text()
+        }
+
+        public headerValue(name: string): string {
+            let value = this.response.headers.get(name)
+            if (!value) throw new Error(`Unable to find "${name}" header field.`)
+            return value
         }
     }
 }
