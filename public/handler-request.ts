@@ -1,5 +1,5 @@
 namespace HttpRelay.Proxy {
-    export class HandlerRequest {
+    class HandlerRequest {
         constructor(private readonly response: Response) {
         }
 

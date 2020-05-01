@@ -1,2 +1,5 @@
-.idea
+.ideajs
 /bin/
+/public/node_modules
+/public/*.js
+/public/*.d.ts
