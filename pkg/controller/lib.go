@@ -14,7 +14,7 @@ func wSecret(r *http.Request) string {
 		}
 	}
 
-	return r.Header.Get("Httprelay-WSecret")
+	return r.Header.Get("HttpRelay-WSecret")
 }
 
 // https://stackoverflow.com/a/22892986/625521 ////////////////////////////////////////

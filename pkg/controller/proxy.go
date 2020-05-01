@@ -31,14 +31,23 @@ func (pc *ProxyCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 	default:
 	}
 
-	pathArr := strings.Split(r.URL.Path, "/")
-	ser := pc.rep.GetSer(pathArr[2])
+	serId, serPath := pc.parsePath(r.URL.Path)
+	ser := pc.rep.GetSer(serId)
+
 	ser.AddWaiter()
 	defer ser.RemoveWaiter()
 
 	if strings.EqualFold(r.Method, "SERVE") {
 		pc.handleServer(ser, r, w)
 	} else {
-		pc.handleClient(ser, pathArr, r, w)
+		pc.handleClient(r, w, ser, serId, serPath)
 	}
+}
+
+func (pc *ProxyCtrl) parsePath(path string) (serId, serPath string) {
+	p := strings.TrimLeft(path, "/")
+	arr := strings.SplitN(p, "/", 3)
+	serId = arr[1]
+	serPath = "/" + arr[2]
+	return
 }

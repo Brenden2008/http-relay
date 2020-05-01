@@ -7,20 +7,32 @@ import (
 )
 
 type ProxyCliData struct {
+	Url       string
 	Method    string
+	Scheme    string
+	Host      string
 	Path      string
+	Query     string
+	Fragment  string
+	SerId     string
 	Header    *http.Header
 	Body      *buffreader.BuffReader
 	RespChan  chan *ProxySerData
 	RespChanL sync.Mutex
 }
 
-func NewProxyCliData(r *http.Request, path string) (proxyReqData *ProxyCliData) {
+func NewProxyCliData(r *http.Request, serId, serPath string) (proxyReqData *ProxyCliData) {
 	proxyReqData = &ProxyCliData{
-		Method: r.Method,
-		Path:   path,
-		Header: &r.Header,
-		Body:   buffreader.New(r.Body),
+		Url:      r.URL.String(),
+		Method:   r.Method,
+		Scheme:   r.URL.Scheme,
+		Host:     r.URL.Host,
+		Path:     serPath,
+		Query:    r.URL.RawQuery,
+		Fragment: r.URL.Fragment,
+		SerId:    serId,
+		Header:   &r.Header,
+		Body:     buffreader.New(r.Body),
 	}
 
 	proxyReqData.Body.Buff()

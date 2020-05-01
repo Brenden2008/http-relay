@@ -27,10 +27,10 @@ func ProxyCtrlCliReq(ctrl *controller.ProxyCtrl, url string, header map[string]s
 func ProxyCtrlSerReq(ctrl *controller.ProxyCtrl, url string, header map[string]string, dataReader io.Reader, reqJobId string, wSecret string) (resp *httptest.ResponseRecorder, respJobId string) {
 	r := newReq("SERVE", url, header, dataReader)
 	defer r.Body.Close()
-	r.Header.Add("httprelay-proxy-jobid", reqJobId)
-	r.Header.Add("httprelay-wsecret", wSecret)
+	r.Header.Add("HttpRelay-Proxy-JobId", reqJobId)
+	r.Header.Add("HttpRelay-WSecret", wSecret)
 	w := httptest.NewRecorder()
 	ctrl.Conduct(w, r)
-	respJobId = w.Header().Get("httprelay-proxy-jobid")
+	respJobId = w.Header().Get("HttpRelay-Proxy-JobId")
 	return w, respJobId
 }

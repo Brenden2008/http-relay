@@ -2,6 +2,7 @@ package unittest
 
 import (
 	"bytes"
+	"fmt"
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
 	"io/ioutil"
 	"net/http"
@@ -9,40 +10,68 @@ import (
 	"time"
 )
 
-func newProxyCliData() (proxyCliData *model.ProxyCliData, r *http.Request, data []byte, path string) {
+func newProxyCliData() (proxyCliData *model.ProxyCliData, r *http.Request, data []byte, serId, serPath, query, fragment, url string) {
 	data = bytes.Repeat([]byte{10}, 10000)
-	path = "/123/test"
-	r, _ = http.NewRequest(http.MethodPost, "https://domain/proxy/123/test", bytes.NewReader(data))
-	proxyCliData = model.NewProxyCliData(r, path)
+	serId = "123"
+	serPath = "/test"
+	query = "first=1&second=last"
+	fragment = "frag1=first&frag2=second"
+	url = fmt.Sprintf("https://demo.httprelay.io/proxy/%s%s?%s#%s", serId, serPath, query, fragment)
+	r, _ = http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+	proxyCliData = model.NewProxyCliData(r, serId, serPath)
 	return
 }
 
 func TestNewProxyCliData(t *testing.T) {
-	pcd, r, data, path := newProxyCliData()
+	pcd, r, data, serId, serPath, query, fragment, url := newProxyCliData()
 
 	if pcd.Method != http.MethodPost {
-		t.Fail()
+		t.Error("HTTP method mismatch")
 	}
 
-	if pcd.Path != path {
-		t.Fail()
+	if pcd.Scheme != "https" {
+		t.Error("Scheme mismatch")
+	}
+
+	if pcd.Host != "demo.httprelay.io" {
+		t.Error("Host mismatch")
+	}
+
+	if pcd.Url != url {
+		t.Error("URL mismatch")
+	}
+
+	if pcd.Path != serPath {
+		t.Error("Path mismatch")
+	}
+
+	if pcd.Query != query {
+		t.Error("Query mismatch")
+	}
+
+	if pcd.Fragment != fragment {
+		t.Error("Fragment mismatch")
+	}
+
+	if pcd.SerId != serId {
+		t.Error("SerId mismatch")
 	}
 
 	if pcd.Header != &r.Header {
-		t.Fail()
+		t.Error("Header mismatch")
 	}
 
 	if b, err := ioutil.ReadAll(pcd.Body); err == nil {
 		if bytes.Compare(b, data) != 0 {
-			t.Fail()
+			t.Error("Body data mismatch")
 		}
 	} else {
-		t.Fail()
+		t.Error("Error while reading body")
 	}
 }
 
 func TestProxyCliDataClose(t *testing.T) {
-	pcd, _, _, _ := newProxyCliData()
+	pcd, _, _, _, _, _, _, _ := newProxyCliData()
 	if !pcd.CloseRespChan() {
 		t.Fail()
 	}
@@ -50,7 +79,7 @@ func TestProxyCliDataClose(t *testing.T) {
 		t.Fail()
 	}
 
-	pcd, _, _, _ = newProxyCliData()
+	pcd, _, _, _, _, _, _, _ = newProxyCliData()
 	go func() { pcd.RespChan <- nil }()
 	time.Sleep(100000)
 	if !pcd.CloseRespChan() {

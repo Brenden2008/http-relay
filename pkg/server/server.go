@@ -41,7 +41,7 @@ func NewServer(listener net.Listener) (server *Server) {
 
 	mcastRep := repository.NewMcastRep(server.stopChan)
 	mcastCtrl := controller.NewMcastCtrl(mcastRep, server.stopChan)
-	http.HandleFunc("/mcast/", corsHandler(mcastCtrl.Conduct, []string{"Httprelay-Seqid"}))
+	http.HandleFunc("/mcast/", corsHandler(mcastCtrl.Conduct, []string{"HttpRelay-SeqId"}))
 
 	proxyRep := repository.NewProxyRep()
 	proxyCtrl := controller.NewProxyCtrl(proxyRep, server.stopChan)
@@ -69,7 +69,7 @@ func cors(w http.ResponseWriter, r *http.Request, expose []string) {
 		origin = "*"
 	}
 	w.Header().Set("Access-Control-Allow-Origin", origin)
-	//w.Header().Set("Httprelay-Version", Version)
+	//w.Header().Set("HttpRelay-Version", Version)
 
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, SERVE")
@@ -96,7 +96,7 @@ func wildcardCors(w http.ResponseWriter, r *http.Request) {
 		origin = "*"
 	}
 	w.Header().Set("Access-Control-Allow-Origin", origin)
-	//w.Header().Set("Httprelay-Version", Version)
+	//w.Header().Set("HttpRelay-Version", Version)
 
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, SERVE")

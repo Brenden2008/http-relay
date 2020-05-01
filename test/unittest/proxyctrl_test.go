@@ -27,7 +27,7 @@ func TestProxyCtrlConduct(t *testing.T) {
 	go func() {
 		defer close(closeChan)
 		resp, jobId := testlib.ProxyCtrlSerReq(proxyCtrl, serUrl, nil, bytes.NewReader([]byte{}), "", "")
-		if resp.Header().Get("httprelay-proxy-path") != serPath {
+		if resp.Header().Get("HttpRelay-Proxy-Path") != serPath {
 			t.Error("Server received wrong path")
 			return
 		}
@@ -104,7 +104,7 @@ func TestProxyCtrlHeaders(t *testing.T) {
 
 	serHeaderNoPass := map[string]string{
 		"test-server-header2":     "Should not pass",
-		"httprelay-proxy-headers": "test-server-header1, test-server-header3",
+		"HttpRelay-Proxy-Headers": "test-server-header1, test-server-header3",
 	}
 
 	serHeader := map[string]string{}

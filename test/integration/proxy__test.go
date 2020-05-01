@@ -85,7 +85,7 @@ func runProxySerReq(t *testing.T, proxyCtrl *controller.ProxyCtrl, server string
 	for !closeChan.Closed() {
 		w, jobId = newProxySerReq(proxyCtrl, data, server, path, jobId)
 		path = w.Header().Get("test-path")
-		jobId = w.Header().Get("httprelay-proxy-jobid")
+		jobId = w.Header().Get("HttpRelay-Proxy-JobId")
 
 		if dataIdx, err := strconv.Atoi(w.Header().Get("test-data-idx")); err == nil {
 			if !testlib.RespDataEq(w.Body, data[dataIdx]) {
@@ -117,7 +117,7 @@ func newProxySerReq(proxyCtrl *controller.ProxyCtrl, data proxyTestData, ser, pa
 	dataIdx := rand.Intn(len(data) - 1)
 	url := fmt.Sprintf("https://example.com/proxy/%s", ser)
 	header := map[string]string{
-		"httprelay-proxy-headers": "test-data-idx, test-path",
+		"HttpRelay-Proxy-Headers": "test-data-idx, test-path",
 		"test-path":               path,
 		"test-data-idx":           strconv.Itoa(dataIdx),
 	}

@@ -67,11 +67,11 @@ func (m *Meta) WriteHeaders(w http.ResponseWriter, yourTime time.Time, content b
 	}
 	w.Header().Set("X-Real-IP", m.SrcIP)
 	w.Header().Set("X-Real-Port", m.SrcPort)
-	w.Header().Set("Httprelay-Time", toUnixMilli(m.Time))
-	w.Header().Set("Httprelay-Your-Time", toUnixMilli(yourTime))
-	w.Header().Set("Httprelay-Method", m.Method)
+	w.Header().Set("HttpRelay-Time", toUnixMilli(m.Time))
+	w.Header().Set("HttpRelay-Your-Time", toUnixMilli(yourTime))
+	w.Header().Set("HttpRelay-Method", m.Method)
 	if m.Query != "" {
-		w.Header().Set("Httprelay-Query", m.Query)
+		w.Header().Set("HttpRelay-Query", m.Query)
 	}
 }
 

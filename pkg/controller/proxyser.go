@@ -14,7 +14,7 @@ func (pc *ProxyCtrl) handleServer(ser *model.ProxySer, r *http.Request, w http.R
 		return
 	}
 
-	if jobId := r.Header.Get("Httprelay-Proxy-Jobid"); jobId != "" {
+	if jobId := r.Header.Get("HttpRelay-Proxy-JobId"); jobId != "" {
 		if cliData, ok := ser.TakeJob(jobId); ok { // Request is previous job response /////////////////////////////////////
 			defer cliData.CloseRespChan()
 
@@ -61,9 +61,15 @@ func (pc *ProxyCtrl) transferSerResp(ser *model.ProxySer, r *http.Request, w htt
 			}
 		}
 
-		w.Header().Set("Httprelay-Proxy-Jobid", jobId)
-		w.Header().Set("Httprelay-Proxy-Method", cliData.Method)
-		w.Header().Set("Httprelay-Proxy-Path", cliData.Path)
+		w.Header().Set("HttpRelay-Proxy-ServerId", cliData.SerId)
+		w.Header().Set("HttpRelay-Proxy-JobId", jobId)
+		w.Header().Set("HttpRelay-Proxy-Url", cliData.Url)
+		w.Header().Set("HttpRelay-Proxy-Method", cliData.Method)
+		w.Header().Set("HttpRelay-Proxy-Scheme", cliData.Scheme)
+		w.Header().Set("HttpRelay-Proxy-Host", cliData.Host)
+		w.Header().Set("HttpRelay-Proxy-Path", cliData.Path)
+		w.Header().Set("HttpRelay-Proxy-Query", cliData.Query)
+		w.Header().Set("HttpRelay-Proxy-Fragment", cliData.Fragment)
 
 		if _, err := io.Copy(w, cliData.Body); err == nil {
 			ser.AddJob(jobId, cliData)

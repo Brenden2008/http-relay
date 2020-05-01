@@ -54,7 +54,7 @@ func (mc *McastCtrl) Conduct(w http.ResponseWriter, r *http.Request) {
 		data := model.NewTeeData(r)
 		if seqId, ok := mc.rep.Write(mcastId, data, wSecret(r)); ok {
 			if _, err := data.CopyContent(); err == nil {
-				w.Header().Set("Httprelay-Seqid", strconv.Itoa(seqId))
+				w.Header().Set("HttpRelay-SeqId", strconv.Itoa(seqId))
 				data.Meta.WriteHeaders(w, yourTime, false)
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -76,7 +76,7 @@ func writeHeaders(w http.ResponseWriter, r *http.Request, seqId int, data *model
 
 	nextSeqid := seqId + 1
 	w.Header().Set("Set-Cookie", fmt.Sprintf("%s=%d; Path=%s; SameSite=None; Secure", seqIdParamName, nextSeqid, r.URL.Path))
-	w.Header().Set("Httprelay-Seqid", strconv.Itoa(seqId))
+	w.Header().Set("HttpRelay-SeqId", strconv.Itoa(seqId))
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	data.Meta.WriteHeaders(w, yourTime, true)

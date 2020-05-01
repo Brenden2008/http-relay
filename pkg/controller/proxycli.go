@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"gitlab.com/jonas.jasas/httprelay/pkg/model"
 	"io"
 	"net/http"
@@ -10,14 +9,8 @@ import (
 	"strings"
 )
 
-func (pc *ProxyCtrl) handleClient(ser *model.ProxySer, pathArr []string, r *http.Request, w http.ResponseWriter) {
-	pathPrefix := fmt.Sprintf("/%s/%s", pathArr[1], pathArr[2])
-	serReqPath := strings.TrimPrefix(r.URL.Path, pathPrefix)
-	if serReqPath == "" {
-		serReqPath = "/"
-	}
-
-	cliData := model.NewProxyCliData(r, serReqPath)
+func (pc *ProxyCtrl) handleClient(r *http.Request, w http.ResponseWriter, ser *model.ProxySer, serId, serPath string) {
+	cliData := model.NewProxyCliData(r, serId, serPath)
 	defer ser.RemoveJob(cliData)  // Make sure that job is removed after client disconnects
 	defer cliData.CloseRespChan() // Marking cliData as no longer needed to avoid adding to job map
 
@@ -51,14 +44,14 @@ func (pc *ProxyCtrl) transferCliResp(data *model.ProxyCliData, r *http.Request, 
 	case respData := <-data.RespChan:
 		w.Header().Add("Content-Type", respData.Header.Get("Content-Type"))
 
-		hStr := respData.Header.Get("Httprelay-Proxy-Headers")
+		hStr := respData.Header.Get("HttpRelay-Proxy-Headers")
 		hArr := strings.Split(hStr, ",")
 		for _, h := range hArr {
 			h = strings.TrimSpace(h)
 			w.Header().Set(h, respData.Header.Get(h))
 		}
 
-		status := respData.Header.Get("Httprelay-Proxy-Status")
+		status := respData.Header.Get("HttpRelay-Proxy-Status")
 		if statusInt, err := strconv.Atoi(status); err == nil {
 			w.WriteHeader(statusInt)
 		}

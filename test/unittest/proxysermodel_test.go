@@ -19,7 +19,7 @@ func TestNewProxySerModelAddTakeJob(t *testing.T) {
 	const jobId = "12345678"
 	psm := model.NewProxySer()
 
-	data, _, _, _ := newProxyCliData()
+	data, _, _, _, _, _, _, _ := newProxyCliData()
 	psm.AddJob(jobId, data)
 
 	if takenData, ok := psm.TakeJob(jobId); ok {
@@ -39,7 +39,7 @@ func TestNewProxySerModelAddRemoveJob(t *testing.T) {
 	const jobId = "12345678"
 	psm := model.NewProxySer()
 
-	data, _, _, _ := newProxyCliData()
+	data, _, _, _, _, _, _, _ := newProxyCliData()
 	psm.AddJob(jobId, data)
 
 	psm.RemoveJob(data)
