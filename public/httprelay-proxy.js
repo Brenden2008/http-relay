@@ -1,131 +1,172 @@
-import HttprelayRouter from "./httprelay-proxy-router"
-import HttprelayHandler from "./httprelay-proxy-handler"
-import HttprelaySerResponse from './httprelay-proxy-ser-response'
-
-export default class Httprelay {
-    constructor(serverId=null, secret=null, proxyUrl='https://staging.httprelay.io/proxy') {
-//    constructor(serverId, proxyUrl='http://localhost:8080/proxy') {
-        // WARNING!!! State is shared between parallel requests!
-        this._serverId = serverId || btoa(Math.random()).substr(5, 5)
-        this._wSecret = secret || btoa(Math.random()).substr(8, 8)
-        this._proxyUrl = proxyUrl
-        this._url = `${this._proxyUrl}/${this._serverId}`
-        this._errRetry = 0
-        this._abortCtrl = new AbortController()
-        this._abortSig = this._abortCtrl.signal
-        this._routes = new HttprelayRouter(this._wSecret, this._abortSig)
-    }
-
-    start(parallel=4) {
-        if (typeof window !== 'undefined') window.addEventListener('beforeunload', () => this.stop())
-        for (let i=0; i<parallel; i++) this._serve()
-    }
-
-    stop() {
-        this._abortCtrl.abort()
-    }
-
-    get routes() {
-        return this._routes
-    }
-
-    _serve(initPro=null) {
-        if (!this._abortSig.aborted) {
-            initPro = initPro || new HttprelaySerResponse(this._wSecret, this._abortSig).reqInitPro
-            Promise.resolve(initPro).then(init => {
-                fetch(this._url, init).then(resp => {
-                    if (resp.status === 200) {
-                        this._errRetry = 0
-                        let method = resp.headers.get('httprelay-proxy-method')
-                        let path = resp.headers.get('httprelay-proxy-path')
-                        let route = this._routes.getRoute(method, path)
-                        CIA!!!!!!
-
-                        this.handle(resp, route.handler, route.params)
-                            .then(req => this._serve(req))
-                    } else {
-                        this.handleError(`Httprelay responded ${resp.status} while returning result and requesting new job`)
-                    }
-                }, err => this.handleError(err, init))
-            })
+"use strict";
+var HttpRelay;
+(function (HttpRelay) {
+    var Proxy;
+    (function (Proxy) {
+        class HandlerCtx {
+            constructor(cliResponse, abortSig, routeParams) {
+                this.cliResponse = cliResponse;
+                this.abortSig = abortSig;
+                this.routeParams = routeParams;
+                this.request = new Proxy.HandlerRequest(cliResponse);
+            }
+            get serverId() {
+                return this.cliResponse.headers.get('HttpRelay-Proxy-ServerId');
+            }
+            get jobId() {
+                return this.cliResponse.headers.get('HttpRelay-Proxy-JobId');
+            }
+            respond(result, meta = {}) {
+            }
         }
-    }
-
-    handle(resp, handlerFunc, handlerParams) {
-        let respPro = handlerFunc(handlerParams, this.respToHandlerReq(resp))     // User can return promise or response
-        return Promise.resolve(respPro)
-            .then(r => this.respToCliReqInit(r))
-            .then(req => {
-                req.headers.set('httprelay-proxy-jobid', resp.headers.get('httprelay-proxy-jobid'))
-                return req
-            })
-    }
-
-    handleError(err, init=this.newCliReqInit()) {
-        if (!this._abortSig.aborted) {
-            setTimeout(() => this._serve(init), this._errRetry++ * 1000)
-            throw err
+    })(Proxy = HttpRelay.Proxy || (HttpRelay.Proxy = {}));
+})(HttpRelay || (HttpRelay = {}));
+var HttpRelay;
+(function (HttpRelay) {
+    var Proxy;
+    (function (Proxy) {
+        class HandlerRequest {
+            constructor(response) {
+                this.response = response;
+            }
+            get url() {
+                return this.response.headers.get('HttpRelay-Proxy-Url');
+            }
+            get method() {
+                return this.response.headers.get('HttpRelay-Proxy-Method');
+            }
+            get scheme() {
+                return this.response.headers.get('HttpRelay-Proxy-Scheme');
+            }
+            get host() {
+                return this.response.headers.get('HttpRelay-Proxy-Host');
+            }
+            get path() {
+                return this.response.headers.get('HttpRelay-Proxy-Path');
+            }
+            get query() {
+                return this.response.headers.get('HttpRelay-Proxy-Query');
+            }
+            get queryParams() {
+                var _a;
+                return new URLSearchParams((_a = this.query) !== null && _a !== void 0 ? _a : '');
+            }
+            get fragment() {
+                return this.response.headers.get('HttpRelay-Proxy-Fragment');
+            }
+            get headers() {
+                return this.response.headers;
+            }
+            get body() {
+                return this.response.body;
+            }
+            arrayBuffer() {
+                return this.response.arrayBuffer();
+            }
+            blob() {
+                return this.response.blob();
+            }
+            formData() {
+                return this.response.formData();
+            }
+            json() {
+                return this.response.json();
+            }
+            text() {
+                return this.response.text();
+            }
         }
-    }
-}
-
-
-
-
-
-// newCliReqInit(status = 200, headers = {}, body = null) {
-//     let newHeaders = new Headers(headers)
-//     newHeaders.set('httprelay-proxy-status', status)
-//     if (this.wSecret) newHeaders.set('httprelay-wsecret', status)
-//     return {
-//         method: 'SERVE',
-//         headers: newHeaders,
-//         body: body,
-//         signal: this._abortSig
-//     }
-// }
-//
-// respToCliReqInit(resp) {
-//     switch (resp.constructor) {
-//         case String:
-//             return this.stringResponse(resp);
-//         case Object:
-//             return this.jsonResponse(resp);
-//         case Array:
-//             return this.jsonResponse(resp);
-//         case Response:
-//             return resp.arrayBuffer().then(body => this.newCliReqInit(resp.status, resp.headers, body))
-//         default:
-//             return resp
-//     }
-// }
-//
-
-
-// respToHandlerReq(resp) {
-//     return {
-//         method: resp.headers.get('httprelay-proxy-method'),
-//         url: resp.headers.get('httprelay-proxy-path'),
-//         headers: new Headers(resp.headers),
-//         body: resp.body,
-//         arrayBuffer: () => resp.arrayBuffer(),
-//         blob: () => resp.blob(),
-//         formData: () => resp.formData(),
-//         json: () => resp.json(),
-//         text: () => resp.text()
-//     }
-// }
-
-// class HandlerResponse {
-//     constructor(status = 200, headers = {}, body = null, abortSig) {
-//         let newHeaders = new Headers(headers)
-//         newHeaders.set('httprelay-proxy-status', status)
-//         if (this.wSecret) newHeaders.set('httprelay-wsecret', status)
-//         const this.init = {
-//             method: 'SERVE',
-//             headers: newHeaders,
-//             body: body,
-//             signal: abortSig
-//         }
-//     }
-// }
+        Proxy.HandlerRequest = HandlerRequest;
+    })(Proxy = HttpRelay.Proxy || (HttpRelay.Proxy = {}));
+})(HttpRelay || (HttpRelay = {}));
+var HttpRelay;
+(function (HttpRelay) {
+    var Proxy;
+    (function (Proxy) {
+        function isBody(value) {
+            return typeof (value) === "string" || value instanceof Blob || value instanceof ArrayBuffer || value instanceof FormData || value instanceof URLSearchParams || value instanceof ReadableStream;
+        }
+        class HandlerResult {
+            constructor(content, abortSig, wSecret, status, headers, fileName, download) {
+                var _a;
+                this.abortSig = abortSig;
+                let defaultHeaders = new Headers();
+                let defaultStatus = 200;
+                let defaultContentType = 'application/json';
+                let defaultFileName = '';
+                if (typeof content === 'string') {
+                    defaultContentType = 'text/html; charset=UTF-8';
+                    this.body = content;
+                }
+                else if (content instanceof Document) {
+                    defaultContentType = 'text/html; charset=UTF-8';
+                    this.body = new XMLSerializer().serializeToString(content);
+                }
+                else if (content instanceof Response) {
+                    defaultStatus = content.status;
+                    defaultContentType = (_a = content.headers.get('content-type')) !== null && _a !== void 0 ? _a : '';
+                    defaultHeaders = content.headers;
+                    this.body = content.arrayBuffer();
+                }
+                else if (content instanceof File) {
+                    defaultContentType = content.type;
+                    defaultFileName = content.name;
+                    this.body = content;
+                }
+                else if (isBody(content)) {
+                    this.body = content;
+                }
+                else {
+                    this.body = JSON.stringify(content);
+                }
+                this.headers = headers ? new Headers(headers) : defaultHeaders;
+                if (!this.headers.has('content-type'))
+                    this.headers.append('content-type', defaultContentType);
+                if (fileName)
+                    defaultFileName = fileName;
+                if (download || defaultFileName) {
+                    let defaultContentDisposition = `${download ? 'attachment' : 'inline'};`;
+                    if (fileName)
+                        defaultContentDisposition += ` filename*=${this.encode(fileName)}`;
+                    if (!this.headers.has('content-disposition'))
+                        this.headers.append('content-disposition', defaultContentDisposition);
+                }
+                let headerWhitelist = Array.from(this.headers).map(h => h[0]).join(', ');
+                this.headers.set('httprelay-proxy-headers', headerWhitelist);
+                this.headers.set('httprelay-proxy-status', `${status !== null && status !== void 0 ? status : defaultStatus}`);
+                if (wSecret)
+                    this.headers.set('httprelay-wsecret', wSecret);
+            }
+            get serRespInitPro() {
+                return Promise.resolve(this.body)
+                    .then(body => ({
+                    method: 'SERVE',
+                    headers: this.headers,
+                    body: body,
+                    signal: this.abortSig
+                }));
+            }
+            encode(str) {
+                return `UTF-8''` + encodeURIComponent(str)
+                    .replace(/['()]/g, function (match) {
+                    return '%' + match.charCodeAt(0).toString(16);
+                })
+                    .replace(/\*/g, '%2A')
+                    .replace(/%(7C|60|5E)/g, function (_, match) {
+                    return String.fromCharCode(parseInt(match, 16));
+                });
+            }
+        }
+    })(Proxy = HttpRelay.Proxy || (HttpRelay.Proxy = {}));
+})(HttpRelay || (HttpRelay = {}));
+var HttpRelay;
+(function (HttpRelay) {
+    var Proxy;
+    (function (Proxy) {
+        class Handler {
+            constructor() {
+            }
+        }
+    })(Proxy = HttpRelay.Proxy || (HttpRelay.Proxy = {}));
+})(HttpRelay || (HttpRelay = {}));
+//# sourceMappingURL=httprelay-proxy.js.map

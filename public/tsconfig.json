@@ -1,0 +1,26 @@
+﻿{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "none",
+    "allowJs": false,
+    "outFile": "httprelay-proxy.js",
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "allowUnreachableCode": false,
+    "skipLibCheck" : true,
+    "strict": true,
+    "target": "es2015",
+    "watch": true,
+    "declaration": true
+  },
+
+  "include": [
+    "*.ts"
+  ],
+
+  "exclude": [
+    "httprelay-proxy.d.ts"
+  ]
+}

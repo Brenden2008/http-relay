@@ -1,0 +1,30 @@
+{
+  "name": "Httprelay-proxy",
+  "version": "1.0.0",
+  "description": "HTTP Relay Proxy communication method server side library",
+  "main": "httprelay-proxy_old.js",
+  "dependencies": {
+    "typescript": "^3.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/jonas.jasas/httprelay.git"
+  },
+  "keywords": [
+    "Client",
+    "to",
+    "client",
+    "HTTP",
+    "communication"
+  ],
+  "author": "Jonas Jasas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/jonas.jasas/httprelay/issues"
+  },
+  "homepage": "https://gitlab.com/jonas.jasas/httprelay#README"
+}
