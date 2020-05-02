@@ -1,35 +1,29 @@
-/// <reference path="handler.ts" />
 /// <reference path="route.ts" />
 
 namespace HttpRelay.Proxy {
 
     export interface SelectedRoute {
-        handler: Handler,
+        handlerFunc: HandlerFunc,
         params: RouteParams
     }
 
     class Routes {
         private readonly routes: Route[] = []
-        private readonly notFoundHandler: Handler
+        private readonly notFoundHandlerFunc: HandlerFunc
 
-        constructor(
-            private readonly wSecret: string,
-            private readonly abortSig: AbortSignal,
-            notFoundHandlerFunc?: HandlerFunc
-        ) {
+        constructor(notFoundHandlerFunc?: HandlerFunc) {
             if (notFoundHandlerFunc) {
-                this.notFoundHandler = new Handler(this.wSecret, this.abortSig, notFoundHandlerFunc)
+                this.notFoundHandlerFunc = notFoundHandlerFunc
             } else {
-                this.notFoundHandler = new Handler(this.wSecret, this.abortSig, ctx => ctx.respond({
+                this.notFoundHandlerFunc = (ctx) => ctx.respond({
                     status: 404,
                     body: `Handler not found for the "${ctx.request.method} ${ctx.request.path}" route on "${ctx.serverId}" server.`
-                }))
+                })
             }
         }
 
         public add(method: string, path: string, handlerFunc: HandlerFunc): void {
-            let handler = new Handler(this.wSecret, this.abortSig, handlerFunc)
-            let route = new Route(method, path, handler)
+            let route = new Route(method, path, handlerFunc)
             this.routes.push(route)
             this.routes.sort((a, b) => a.compare(b))
         }
@@ -45,7 +39,7 @@ namespace HttpRelay.Proxy {
             })
 
             return <SelectedRoute> {
-                handler: route ? route.handler : this.notFoundHandler,
+                handlerFunc: route ? route.handlerFunc : this.notFoundHandlerFunc,
                 params: routeParams
             }
         }

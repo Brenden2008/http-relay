@@ -1,6 +1,6 @@
-/// <reference path="handler.ts" />
-
 namespace HttpRelay.Proxy {
+    export type HandlerFunc = (ctx: HandlerCtx) => any;
+
     export class Route {
         private readonly methodRx: RegExp
         private readonly pathRx: RegExp
@@ -9,7 +9,7 @@ namespace HttpRelay.Proxy {
         constructor(
             public readonly method: string,
             public readonly path: string,
-            public readonly handler: Handler
+            public readonly handlerFunc: HandlerFunc
         ) {
             this.methodRx = RegExp(method)
             this.pathRx = RegExp("^" + path.replace(/:[^\s/]+/g, '([\\w-]+)') + "$")
