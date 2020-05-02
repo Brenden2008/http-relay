@@ -1,18 +1,20 @@
 // /// <reference path="handler-request.ts" />
 
 namespace HttpRelay.Proxy {
-    type PlainHeaders = Headers | Record<string, string>
+    export type PlainHeaders = Headers | Record<string, string>
+    export type RouteParams = string[]
 
-    interface ResponseMeta {
+    interface RespondParams {
+        body?: any,
         status?: number
         headers?: PlainHeaders
         fileName?: string
         download?: boolean
     }
 
-    class HandlerResult {
+    export class HandlerFuncResult {
         constructor(
-            public readonly content: any,
+            public readonly body: any,
             public readonly status?: number,
             public readonly headers?: PlainHeaders,
             public readonly fileName?: string,
@@ -23,7 +25,7 @@ namespace HttpRelay.Proxy {
     type Body = string | Blob | ArrayBuffer | FormData | URLSearchParams | ReadableStream | Promise<ArrayBuffer>
 
     function isBody(value: Body): value is Body {
-        return typeof(value) === "string"
+        return typeof(value) === 'string'
             || value instanceof Blob
             || value instanceof ArrayBuffer
             || value instanceof FormData
@@ -33,9 +35,9 @@ namespace HttpRelay.Proxy {
 
     export class HandlerCtx {
         constructor(
-            private readonly request: HandlerRequest,
+            public readonly request: HandlerRequest,
             public readonly abortSig: AbortSignal,
-            public readonly routeParams: string[]
+            public readonly routeParams: RouteParams
         ) {}
 
         get serverId(): string {
@@ -46,8 +48,8 @@ namespace HttpRelay.Proxy {
             return this.request.headerValue('HttpRelay-Proxy-JobId')
         }
 
-        public respond(content: any, meta: ResponseMeta = {}): HandlerResult {
-            return new HandlerResult(content, meta.status, meta.headers, meta.fileName, meta.download)
+        public respond(result: RespondParams = {}): HandlerFuncResult {
+            return new HandlerFuncResult(result.body, result.status, result.headers, result.fileName, result.download)
         }
     }
 }
