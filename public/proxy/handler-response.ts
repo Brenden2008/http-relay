@@ -1,4 +1,4 @@
-namespace HttpRelay.Proxy {
+//namespace HttpRelay.Proxy {
     type ResultBody = string | Blob | ArrayBuffer | FormData | URLSearchParams | ReadableStream | Promise<ArrayBuffer>
 
     function isResultBody(value: ResultBody): value is ResultBody {
@@ -10,7 +10,7 @@ namespace HttpRelay.Proxy {
             || value instanceof ReadableStream
     }
 
-    export class HandlerResponse {
+    class HandlerResponse {
         public readonly body: ResultBody | undefined
         public readonly headers: Headers
 
@@ -78,4 +78,4 @@ namespace HttpRelay.Proxy {
                     });
         }
     }
-}
+//}

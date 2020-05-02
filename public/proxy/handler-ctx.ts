@@ -1,8 +1,9 @@
 /// <reference path="handler-response.ts" />
+/// <reference path="handler-request.ts" />
 
-namespace HttpRelay.Proxy {
-    export type PlainHeaders = Headers | Record<string, string>
-    export type RouteParams = string[]
+//namespace HttpRelay.Proxy {
+    type PlainHeaders = Headers | Record<string, string>
+    type RouteParams = string[]
 
     interface RespondParams {
         body?: any,
@@ -12,7 +13,7 @@ namespace HttpRelay.Proxy {
         download?: boolean
     }
 
-    export class HandlerCtx {
+    class HandlerCtx {
         constructor(
             public readonly request: HandlerRequest,
             public readonly abortSig: AbortSignal,
@@ -31,4 +32,4 @@ namespace HttpRelay.Proxy {
             return new HandlerResponse(result.body, result.status, result.headers, result.fileName, result.download)
         }
     }
-}
+//}

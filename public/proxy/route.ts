@@ -1,7 +1,7 @@
-namespace HttpRelay.Proxy {
-    export type HandlerFunc = (ctx: HandlerCtx) => any;
+//namespace HttpRelay.Proxy {
+    type HandlerFunc = (ctx: HandlerCtx) => any;
 
-    export class Route {
+    class Route {
         private readonly methodRx: RegExp
         private readonly pathRx: RegExp
         private readonly pathDepth: number
@@ -30,4 +30,4 @@ namespace HttpRelay.Proxy {
             return null
         }
     }
-}
+//}

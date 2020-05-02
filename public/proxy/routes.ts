@@ -1,25 +1,22 @@
 /// <reference path="route.ts" />
+/// <reference path="handler-ctx.ts" />
 
-namespace HttpRelay.Proxy {
+//namespace HttpRelay.Proxy {
 
-    export interface SelectedRoute {
+    interface SelectedRoute {
         handlerFunc: HandlerFunc,
         params: RouteParams
     }
 
     class Routes {
         private readonly routes: Route[] = []
-        private readonly notFoundHandlerFunc: HandlerFunc
+        public notFoundHandlerFunc: HandlerFunc
 
-        constructor(notFoundHandlerFunc?: HandlerFunc) {
-            if (notFoundHandlerFunc) {
-                this.notFoundHandlerFunc = notFoundHandlerFunc
-            } else {
-                this.notFoundHandlerFunc = (ctx) => ctx.respond({
-                    status: 404,
-                    body: `Handler not found for the "${ctx.request.method} ${ctx.request.path}" route on "${ctx.serverId}" server.`
-                })
-            }
+        constructor() {
+            this.notFoundHandlerFunc = ctx => ctx.respond({
+                status: 404,
+                body: `Handler not found for the "${ctx.request.method} ${ctx.request.path}" route on "${ctx.serverId}" server.`
+            })
         }
 
         public add(method: string, path: string, handlerFunc: HandlerFunc): void {
@@ -52,4 +49,4 @@ namespace HttpRelay.Proxy {
             this.add('POST', path, handlerFunc)
         }
     }
-}
+//}
