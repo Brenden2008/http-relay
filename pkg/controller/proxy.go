@@ -48,6 +48,9 @@ func (pc *ProxyCtrl) parsePath(path string) (serId, serPath string) {
 	p := strings.TrimLeft(path, "/")
 	arr := strings.SplitN(p, "/", 3)
 	serId = arr[1]
-	serPath = "/" + arr[2]
+	serPath = "/"
+	if len(arr) > 2 {
+		serPath += arr[2]
+	}
 	return
 }
