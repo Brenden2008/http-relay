@@ -1,9 +1,8 @@
 ﻿{
   "compileOnSave": true,
   "compilerOptions": {
-    "module": "none",
+    "module": "ES2015",
     "allowJs": false,
-    "outFile": "httprelay.js",
     "noImplicitAny": false,
     "noEmitOnError": true,
     "removeComments": true,
@@ -21,6 +20,6 @@
   ],
 
   "exclude": [
-    "httprelay-proxy.d.ts"
+    "**/*.d.ts"
   ]
 }

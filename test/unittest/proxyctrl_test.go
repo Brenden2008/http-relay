@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-const serUrl = "https://domain/proxy/123/test"
+const serUrl = "https://domain/proxy/123"
 const serPath = "/test"
 
 var cliData1 = newData("Client data 1. ", 10000)
@@ -19,7 +19,7 @@ func TestProxyCtrlConduct(t *testing.T) {
 	proxyCtrl, _, closeChan := testlib.NewProxyCtrl()
 	go func() {
 		defer close(closeChan)
-		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl, nil, bytes.NewReader(cliData1))
+		resp := testlib.ProxyCtrlCliReq(proxyCtrl, serUrl+serPath, nil, bytes.NewReader(cliData1))
 		if !testlib.RespDataEq(resp.Body, serData1) {
 			t.Error("Client received wrong response body")
 		}
