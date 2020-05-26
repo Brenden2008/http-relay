@@ -67,6 +67,7 @@ func (pc *ProxyCtrl) transferSerResp(ser *model.ProxySer, r *http.Request, w htt
 		w.Header().Set("HttpRelay-Proxy-Method", cliData.Method)
 		w.Header().Set("HttpRelay-Proxy-Scheme", cliData.Scheme)
 		w.Header().Set("HttpRelay-Proxy-Host", cliData.Host)
+		w.Header().Set("HttpRelay-Proxy-Port", cliData.Port)
 		w.Header().Set("HttpRelay-Proxy-Path", cliData.Path)
 		w.Header().Set("HttpRelay-Proxy-Query", cliData.Query)
 		w.Header().Set("HttpRelay-Proxy-Fragment", cliData.Fragment)
