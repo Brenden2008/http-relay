@@ -1,3 +1,7 @@
+stages:
+  - build
+  - publish
+
 .docker:
   image: docker:stable
   variables:
@@ -8,6 +12,7 @@
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
 
 docker:img:
+  stage: build
   extends: .docker
   services:
     - docker:dind
@@ -17,6 +22,7 @@ docker:img:
     - docker push $GITLAB_REG_TAG
 
 docker:publish:
+  stage: publish
   extends: .docker
   only:
     - tags
