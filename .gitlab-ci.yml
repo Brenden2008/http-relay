@@ -4,13 +4,31 @@
     DOCKER_HOST: tcp://docker:2375
     GITLAB_REG_TAG: registry.gitlab.com/$CI_PROJECT_PATH:$CI_PIPELINE_IID
 
-build:docker:img:
-  extends: .docker
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
 
+docker:img:
+  extends: .docker
   services:
     - docker:dind
 
   script:
     - docker build --tag $GITLAB_REG_TAG .
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - docker push $GITLAB_REG_TAG
+
+docker:publish:
+  extends: .docker
+  only:
+    - tags
+#    - /v\d*/
+
+  services:
+    - docker:dind
+
+  variables:
+    GITHUB_REG_TAG: $DOCKERHUB_USER/$CI_PROJECT_NAME:$CI_COMMIT_TAG
+
+  script:
+    - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_TOKEN
+    - docker tag $GITLAB_REG_TAG $GITHUB_REG_TAG
+    - docker push $GITHUB_REG_TAG
