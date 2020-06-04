@@ -17,35 +17,21 @@ stages:
 test:unit:
   stage: test
   extends: .prepare:go
-  only:
-    - tags
-
-  script:
-    - go test ./test/unittest/... -cover
+  script: go test ./test/unittest/... -cover
 
 test:race:
   stage: test
   extends: .prepare:go
-  only:
-    - tags
-
-  script:
-    - go build --race ./cmd/...
+  script: go build --race ./cmd/...
 
 test:integration:
   stage: test
   extends: .prepare:go
-  only:
-    - tags
-
-  script:
-    - go test ./test/integration/...
+  script: go test ./test/integration/...
 
 build:download:
   stage: build
-  extends:
-    - .prepare:go
-
+  extends: .prepare:go
   only:
     - tags
     - /v\d*/
@@ -90,20 +76,22 @@ build:download:
       --data '{ "name": "'"$CI_COMMIT_TAG"'", "tag_name": "'"$CI_COMMIT_TAG"'", "description": "'"$DESCRIPTION"'", "assets": { "links": [{ "name": "Download standalone binaries (Linux, Mac, Windows)", "url": "https://gitlab.com/jonas.jasas/httprelay/-/jobs/'"$CI_JOB_ID"'/artifacts/browse/download" }] } }'
       https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
+.docker:
+  image: docker:stable
+  variables:
+    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+
 build:docker:img:
   stage: build
-  image: docker:stable
-
+  extends: .docker
   only:
     - tags
 
   services:
     - docker:dind
 
-  variables:
-    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
 
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
@@ -111,14 +99,9 @@ build:docker:img:
     - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
     - docker push $CONTAINER_IMAGE
 
-pages:
-  stage: deploy
-  image: alpine:latest
-#  only:
-#    refs:
-#      - master
-  script:
-    - echo 'Nothing to do...'
-  artifacts:
-    paths:
-      - public
+
+
+
+
+
+      ${CI_PIPELINE_IID}
