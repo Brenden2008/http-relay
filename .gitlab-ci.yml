@@ -1,7 +1,7 @@
 stages:
   - build
-  - test
   - publish
+  - test
 
 .go:
   image: golang
@@ -122,10 +122,12 @@ docker:publish:
     - docker:dind
 
   variables:
-    GITHUB_REG_TAG: $DOCKERHUB_USER/$CI_PROJECT_NAME:$CI_COMMIT_TAG
+    GITHUB_REG_IMG: $DOCKERHUB_USER/$CI_PROJECT_NAME
+    GITHUB_REG_TAG: $GITHUB_REG_IMG:$CI_COMMIT_TAG
 
   script:
     - docker pull $GITLAB_REG_TAG
     - echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin
-    - docker tag $GITLAB_REG_TAG $GITHUB_REG_TAG
-    - docker push $GITHUB_REG_TAG
+    - docker tag $GITLAB_REG_TAG $GITHUB_REG_IMG
+    - docker tag $GITLAB_REG_TAG $GITHUB_REG_IMG:$CI_COMMIT_TAG
+    - docker push $GITHUB_REG_IMG
