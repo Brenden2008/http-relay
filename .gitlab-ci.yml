@@ -43,6 +43,9 @@ download:build:
     - .go
     - .download
 
+  variables:
+    GZIP: '-9'
+
   script:
     - mkdir download
 
