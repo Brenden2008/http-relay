@@ -33,52 +33,42 @@ test:integration:
 # DOWNLOADS ################################################################################
 
 .download:
+  artifacts:
+    paths:
+      - download/
+
+download:build:
   stage: build
-  extends: .go
-  artifacts:
-    paths:
-      - download/
+  extends:
+    - .go
+    - .download
+
   script:
-    - mkdir -p download
+    - mkdir download
 
-download:build:lin-386:
-  extends: .download
-  artifacts:
-    paths:
-      - download/
-  after_script:
-    - GOOS=linux GOARCH=386 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o /dev/stdout ./cmd/... | gzip -9 > download/httprelay_linux_386_$CI_COMMIT_TAG.gz
-#    - tar -czf download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz -C bin .
+    - GOOS=linux GOARCH=386 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
 
-#download:build:lin-amd64:
-#  extends: .download
-#  after_script:
-#    - GOOS=linux GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
-#
-#download:build:lin-arm:
-#  extends: .download
-#  after_script:
-#    - GOOS=linux GOARCH=arm go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm_$CI_COMMIT_TAG.tar.gz -C bin .
-#
-#download:build:lin-arm64:
-#  extends: .download
-#  after_script:
-#    - GOOS=linux GOARCH=arm64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_linux_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
-#
-#download:build:win-amd64:
-#  extends: .download
-#  after_script:
-#    - GOOS=windows GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-#    - tar -czf download/httprelay_windows_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
-#
-#download:build:mac-amd64:
-#  extends: .download
-#  after_script:
-#    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-#    - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - GOOS=linux GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=arm go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_arm_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=linux GOARCH=arm64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_linux_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=windows GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+    - tar -czf download/httprelay_windows_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
+
+    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+    - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+    - rm -r bin
 
 download:publish:
   extends: .download
@@ -87,7 +77,7 @@ download:publish:
     - tags
     - /v\d*/
 
-  after_script:
+  script:
     - >
       curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
 
