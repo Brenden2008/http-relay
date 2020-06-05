@@ -46,7 +46,7 @@ download:build:lin-386:
   artifacts:
     expose_as: 'httprelay386'
     paths:
-      - download/download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz
+      - download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz
   after_script:
     - GOOS=linux GOARCH=386 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
     - tar -czf download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz -C bin .
