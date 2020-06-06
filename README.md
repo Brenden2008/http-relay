@@ -15,6 +15,14 @@ gitlab ..> java
 java ..> rocket
 ```
 
+```mermaid
+sequenceDiagram
+    Alice->>John: Hello John, how are you?
+    activate John
+    John-->>Alice: Great!
+    deactivate John
+```
+
 # HTTP Relay
 HTTP client to client (web browser to web browser) communication
 
