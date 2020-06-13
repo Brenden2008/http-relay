@@ -128,6 +128,22 @@ If consumer provides `SeqId` greater than most recent `SeqId`. Request will wait
 - **[Multi-user painting example](https://jsfiddle.net/jasajona/ky0cLgf9/)**
 - **[Location sharing example](https://jsfiddle.net/jasajona/5ks1y3nL/)**
 - **[Image exchange example](https://jsfiddle.net/jasajona/f2an7tjh/)**
+
+
+### Proxy (Server <-> Client)
+Proxy communication method allows an HTTP client to act as a server.
+Using this method you can turn web browser or any other HTTP client into a server.
+
+[HTTP Relay JavaScript library](https://gitlab.com/jonas.jasas/httprelay-js) 
+is a small framework that abstracts communication with the HTTP Relay server and lets you feel like your web browser is a server accessible online.
+
+
+- **[Basic usage](https://codesandbox.io/s/ik6w1)**
+- **[Interactive page](https://codesandbox.io/s/gzwuv)**
+- **[File sharing](https://codesandbox.io/s/mrhsf)**
+- **[REST API](https://codesandbox.io/s/uu9l3)**
+- **[Assets](https://codesandbox.io/s/90t1d)**
+
  
 ## Writing permission
 Producer can take ownership of `channel id` by providing `wsecret` query parameter.
