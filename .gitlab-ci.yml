@@ -1,7 +1,7 @@
 stages:
   - test
   - build
-  - publish
+  - release
 
 .go:
   image: golang
@@ -73,9 +73,9 @@ stages:
 #    - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
 #    - rm -r bin
 #
-#download:publish:
+#download:release:
 #  extends: .download
-#  stage: publish
+#  stage: release
 #  only:
 #    - tags
 #    - /v\d*/
@@ -97,7 +97,8 @@ stages:
   variables:
     DOCKER_HOST: tcp://docker:2375
     GITLAB_REG_IMG: registry.gitlab.com/$CI_PROJECT_PATH
-    GITLAB_REG_TAG: registry.gitlab.com/$CI_PROJECT_PATH:build-$CI_PIPELINE_IID
+    GITLAB_REG_BUILD_TAG: registry.gitlab.com/$CI_PROJECT_PATH:build-$CI_PIPELINE_IID
+    GITLAB_REG_RELEASE_TAG: registry.gitlab.com/$CI_PROJECT_PATH:${CI_COMMIT_TAG:1}
 
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
@@ -109,11 +110,11 @@ docker:build:
     - docker:dind
 
   script:
-    - docker build --tag $GITLAB_REG_TAG .
-    - docker push $GITLAB_REG_TAG
+    - docker build --tag $GITLAB_REG_BUILD_TAG .
+    - docker push $GITLAB_REG_BUILD_TAG
 
-docker:publish:
-  stage: publish
+docker:release:
+  stage: release
   extends: .docker
   only:
     - tags
@@ -126,10 +127,10 @@ docker:publish:
     GITHUB_REG_IMG: $DOCKERHUB_USER/$CI_PROJECT_NAME
 
   script:
-    - docker pull $GITLAB_REG_TAG
-    - docker tag $GITLAB_REG_TAG $GITLAB_REG_IMG:${CI_COMMIT_TAG:1}
-    - docker push $GITLAB_REG_TAG
+    - docker pull $GITLAB_REG_BUILD_TAG
+    - docker tag $GITLAB_REG_BUILD_TAG $GITLAB_REG_RELEASE_TAG
+    - docker push $GITLAB_REG_RELEASE_TAG
     - echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin
-    - docker tag $GITLAB_REG_TAG $GITHUB_REG_IMG
-    - docker tag $GITLAB_REG_TAG $GITHUB_REG_IMG:${CI_COMMIT_TAG:1}
+    - docker tag $GITLAB_REG_RELEASE_TAG $GITHUB_REG_IMG
+    - docker tag $GITLAB_REG_RELEASE_TAG $GITHUB_REG_IMG:${CI_COMMIT_TAG:1}
     - docker push $GITHUB_REG_IMG
