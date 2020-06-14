@@ -98,7 +98,6 @@ stages:
     DOCKER_HOST: tcp://docker:2375
     GITLAB_REG_IMG: registry.gitlab.com/$CI_PROJECT_PATH
     GITLAB_REG_BUILD_TAG: registry.gitlab.com/$CI_PROJECT_PATH:build-$CI_PIPELINE_IID
-    GITLAB_REG_RELEASE_TAG: registry.gitlab.com/$CI_PROJECT_PATH:${CI_COMMIT_TAG:1}
 
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
@@ -125,6 +124,7 @@ docker:release:
 
   variables:
     GITHUB_REG_IMG: $DOCKERHUB_USER/$CI_PROJECT_NAME
+    GITLAB_REG_RELEASE_TAG: registry.gitlab.com/$CI_PROJECT_PATH:${CI_COMMIT_TAG:1}
 
   script:
     - docker pull $GITLAB_REG_BUILD_TAG
