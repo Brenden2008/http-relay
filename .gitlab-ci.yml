@@ -15,80 +15,80 @@ stages:
 
 # TEST ######################################################################################
 
-test:unit:
-  stage: test
-  extends: .go
-  script: go test ./test/unittest/... -cover
-
-test:race:
-  stage: test
-  extends: .go
-  script: go build --race ./cmd/...
-
-test:integration:
-  stage: test
-  extends: .go
-  script: go test ./test/integration/...
+#test:unit:
+#  stage: test
+#  extends: .go
+#  script: go test ./test/unittest/... -cover
+#
+#test:race:
+#  stage: test
+#  extends: .go
+#  script: go build --race ./cmd/...
+#
+#test:integration:
+#  stage: test
+#  extends: .go
+#  script: go test ./test/integration/...
 
 # DOWNLOADS ################################################################################
 
-.download:
-  artifacts:
-    paths:
-      - download/
-
-download:build:
-  stage: build
-  extends:
-    - .go
-    - .download
-
-  variables:
-    GZIP: '-9'
-
-  script:
-    - mkdir download
-
-    - GOOS=linux GOARCH=386 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=arm go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm_$CI_COMMIT_TAG.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=linux GOARCH=arm64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_linux_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=windows GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
-    - tar -czf download/httprelay_windows_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
-    - rm -r bin
-
-    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
-    - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
-    - rm -r bin
-
-download:publish:
-  extends: .download
-  stage: publish
-  only:
-    - tags
-    - /v\d*/
-
-  script:
-    - >
-      curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
-
-    - export DESCRIPTION=`echo $CI_COMMIT_MESSAGE | tr '\n' ' '`
-    - >
-      curl -v --header "Content-Type: application/json" --header "PRIVATE-TOKEN: $API_TOKEN"
-      --data '{ "name": "'"$CI_COMMIT_TAG"'", "tag_name": "'"$CI_COMMIT_TAG"'", "description": "'"$DESCRIPTION"'", "assets": { "links": [{ "name": "Download standalone binaries (Linux, Mac, Windows)", "url": "https://gitlab.com/jonas.jasas/httprelay/-/jobs/'"$CI_JOB_ID"'/artifacts/browse/download" }] } }'
-      https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
+#.download:
+#  artifacts:
+#    paths:
+#      - download/
+#
+#download:build:
+#  stage: build
+#  extends:
+#    - .go
+#    - .download
+#
+#  variables:
+#    GZIP: '-9'
+#
+#  script:
+#    - mkdir download
+#
+#    - GOOS=linux GOARCH=386 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_386_$CI_COMMIT_TAG.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm_$CI_COMMIT_TAG.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=linux GOARCH=arm64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_linux_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=windows GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME}.exe ./cmd/...
+#    - tar -czf download/httprelay_windows_amd64_$CI_COMMIT_TAG.tar.gz -C bin .
+#    - rm -r bin
+#
+#    - GOOS=darwin GOARCH=amd64 go build -ldflags "-X gitlab.com/jonas.jasas/httprelay/pkg/server.Version=$CI_COMMIT_TAG" -o bin/${CI_PROJECT_NAME} ./cmd/...
+#    - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
+#    - rm -r bin
+#
+#download:publish:
+#  extends: .download
+#  stage: publish
+#  only:
+#    - tags
+#    - /v\d*/
+#
+#  script:
+#    - >
+#      curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
+#
+#    - export DESCRIPTION=`echo $CI_COMMIT_MESSAGE | tr '\n' ' '`
+#    - >
+#      curl -v --header "Content-Type: application/json" --header "PRIVATE-TOKEN: $API_TOKEN"
+#      --data '{ "name": "'"$CI_COMMIT_TAG"'", "tag_name": "'"$CI_COMMIT_TAG"'", "description": "'"$DESCRIPTION"'", "assets": { "links": [{ "name": "Download standalone binaries (Linux, Mac, Windows)", "url": "https://gitlab.com/jonas.jasas/httprelay/-/jobs/'"$CI_JOB_ID"'/artifacts/browse/download" }] } }'
+#      https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
 # DOCKER ###################################################################################
 
@@ -96,7 +96,8 @@ download:publish:
   image: docker:stable
   variables:
     DOCKER_HOST: tcp://docker:2375
-    GITLAB_REG_TAG: registry.gitlab.com/$CI_PROJECT_PATH:$CI_PIPELINE_IID
+    GITLAB_REG_IMG: registry.gitlab.com/$CI_PROJECT_PATH
+    GITLAB_REG_TAG: $GITLAB_REG_IMG:build-$CI_PIPELINE_IID
 
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
@@ -126,6 +127,8 @@ docker:publish:
 
   script:
     - docker pull $GITLAB_REG_TAG
+    - docker tag $GITLAB_REG_TAG $GITLAB_REG_IMG:${CI_COMMIT_TAG:1}
+    - docker push $GITLAB_REG_TAG
     - echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin
     - docker tag $GITLAB_REG_TAG $GITHUB_REG_IMG
     - docker tag $GITLAB_REG_TAG $GITHUB_REG_IMG:${CI_COMMIT_TAG:1}
