@@ -97,7 +97,7 @@ stages:
   variables:
     DOCKER_HOST: tcp://docker:2375
     GITLAB_REG_IMG: registry.gitlab.com/$CI_PROJECT_PATH
-    GITLAB_REG_TAG: $GITLAB_REG_IMG:build-$CI_PIPELINE_IID
+    GITLAB_REG_TAG: registry.gitlab.com/$CI_PROJECT_PATH:build-$CI_PIPELINE_IID
 
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
