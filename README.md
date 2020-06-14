@@ -137,7 +137,6 @@ Using this method you can turn web browser or any other HTTP client into a serve
 [HTTP Relay JavaScript library](https://gitlab.com/jonas.jasas/httprelay-js) 
 is a small framework that abstracts communication with the HTTP Relay server and lets you feel like your web browser is a server accessible online.
 
-
 - **[Basic usage](https://codesandbox.io/s/ik6w1)**
 - **[Interactive page](https://codesandbox.io/s/gzwuv)**
 - **[File sharing](https://codesandbox.io/s/mrhsf)**
