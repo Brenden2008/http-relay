@@ -1,4 +1,9 @@
-.prepare:go:
+stages:
+  - test
+  - build
+  - release
+
+.go:
   image: golang
   before_script:
     - export NS_DIR=$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
@@ -8,42 +13,38 @@
     - cd $PROJ_DIR
     - go get ./...
 
-stages:
-  - test
-  - build
-  - image
-#  - deploy
+# TEST ######################################################################################
+
+test:unit:
+  stage: test
+  extends: .go
+  script: go test ./test/unittest/... -cover
 
 test:race:
   stage: test
-  extends: .prepare:go
-  only:
-    - tags
-
-  script:
-    - go build --race ./cmd/...
+  extends: .go
+  script: go build --race ./cmd/...
 
 test:integration:
   stage: test
-  extends: .prepare:go
-  only:
-    - tags
+  extends: .go
+  script: go test ./test/integration/...
 
-  script:
-    - go test ./test/... -cover
+# DOWNLOADS ################################################################################
 
-build:download:
-  stage: build
-  extends:
-    - .prepare:go
-
-  only:
-    - tags
-#    - /v\d*/
-
+.download:
   artifacts:
     paths:
       - download/
+
+download:build:
+  stage: build
+  extends:
+    - .go
+    - .download
+
+  variables:
+    GZIP: '-9'
 
   script:
     - mkdir download
@@ -72,6 +73,14 @@ build:download:
     - tar -czf download/httprelay_macosx_arm64_$CI_COMMIT_TAG.tar.gz -C bin .
     - rm -r bin
 
+download:release:
+  extends: .download
+  stage: release
+  only:
+    - tags
+    - /v\d*/
+
+  script:
     - >
       curl --request DELETE --header "PRIVATE-TOKEN: $API_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/v2"
 
@@ -81,35 +90,47 @@ build:download:
       --data '{ "name": "'"$CI_COMMIT_TAG"'", "tag_name": "'"$CI_COMMIT_TAG"'", "description": "'"$DESCRIPTION"'", "assets": { "links": [{ "name": "Download standalone binaries (Linux, Mac, Windows)", "url": "https://gitlab.com/jonas.jasas/httprelay/-/jobs/'"$CI_JOB_ID"'/artifacts/browse/download" }] } }'
       https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases
 
-build:docker:img:
-  stage: build
-  image: docker:stable
+# DOCKER ###################################################################################
 
+.docker:
+  image: docker:stable
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    GITLAB_REG_IMG: registry.gitlab.com/$CI_PROJECT_PATH
+    GITLAB_REG_BUILD_TAG: registry.gitlab.com/$CI_PROJECT_PATH:build-$CI_PIPELINE_IID
+    GITLAB_REG_RELEASE_TAG: registry.gitlab.com/$CI_PROJECT_PATH:${CI_COMMIT_TAG}
+
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+
+docker:build:
+  stage: build
+  extends: .docker
+  services:
+    - docker:dind
+
+  script:
+    - docker build --tag $GITLAB_REG_BUILD_TAG .
+    - docker push $GITLAB_REG_BUILD_TAG
+
+docker:release:
+  stage: release
+  extends: .docker
   only:
     - tags
+    - /v\d*/
 
   services:
     - docker:dind
 
   variables:
-    CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
+    GITHUB_REG_IMG: $DOCKERHUB_USER/$CI_PROJECT_NAME
 
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker build --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG .
-    - '[[ $CI_COMMIT_TAG != *-* ]] && docker tag $CONTAINER_IMAGE:$CI_COMMIT_TAG $CONTAINER_IMAGE'
-    - docker push $CONTAINER_IMAGE
-
-#pages:
-#  stage: deploy
-#  image: alpine:latest
-##  only:
-##    refs:
-##      - master
-#  script:
-#    - echo 'Nothing to do...'
-#  artifacts:
-#    paths:
-#      - public
+    - docker pull $GITLAB_REG_BUILD_TAG
+    - docker tag $GITLAB_REG_BUILD_TAG $GITLAB_REG_RELEASE_TAG
+    - docker push $GITLAB_REG_RELEASE_TAG
+    - echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin
+    - docker tag $GITLAB_REG_RELEASE_TAG $GITHUB_REG_IMG
+    - docker tag $GITLAB_REG_RELEASE_TAG $GITHUB_REG_IMG:${CI_COMMIT_TAG:1}
+    - docker push $GITHUB_REG_IMG

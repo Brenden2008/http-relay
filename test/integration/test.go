@@ -116,10 +116,10 @@ package integration
 //		rr.contentType = resp.Header.Get("Content-Type")
 //		rr.ip = resp.Header.Get("X-Real-IP")
 //		rr.port = resp.Header.Get("X-Real-Port")
-//		rr.time = resp.Header.Get("Httprelay-Time")
-//		rr.yourTime = resp.Header.Get("Httprelay-Your-Time")
-//		rr.method = resp.Header.Get("Httprelay-Method")
-//		rr.query = resp.Header.Get("Httprelay-Query")
+//		rr.time = resp.Header.Get("HttpRelay-Time")
+//		rr.yourTime = resp.Header.Get("HttpRelay-Your-Time")
+//		rr.method = resp.Header.Get("HttpRelay-Method")
+//		rr.query = resp.Header.Get("HttpRelay-Query")
 //	}
 //	c <- rr
 //}

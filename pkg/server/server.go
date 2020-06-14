@@ -41,10 +41,14 @@ func NewServer(listener net.Listener) (server *Server) {
 
 	mcastRep := repository.NewMcastRep(server.stopChan)
 	mcastCtrl := controller.NewMcastCtrl(mcastRep, server.stopChan)
-	http.HandleFunc("/mcast/", corsHandler(mcastCtrl.Conduct, []string{"Httprelay-Seqid"}))
+	http.HandleFunc("/mcast/", corsHandler(mcastCtrl.Conduct, []string{"HttpRelay-SeqId"}))
 
-	server.outdaters = []repository.Outdater{linkRep, mcastRep}
-	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl}
+	proxyRep := repository.NewProxyRep()
+	proxyCtrl := controller.NewProxyCtrl(proxyRep, server.stopChan)
+	http.HandleFunc("/proxy/", wildcardCorsHandler(proxyCtrl.Conduct))
+
+	server.outdaters = []repository.Outdater{linkRep, mcastRep, proxyRep}
+	server.waiters = []Waiter{syncCtrl, linkCtrl, mcastCtrl, proxyCtrl}
 
 	return
 }
@@ -65,14 +69,40 @@ func cors(w http.ResponseWriter, r *http.Request, expose []string) {
 		origin = "*"
 	}
 	w.Header().Set("Access-Control-Allow-Origin", origin)
-	w.Header().Set("Httprelay-Version", Version)
+	//w.Header().Set("HttpRelay-Version", Version)
 
 	if r.Method == "OPTIONS" {
-		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, SERVE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	} else {
 		expose = append(expose, "Content-Length, X-Real-IP, X-Real-Port, Httprelay-Version, Httprelay-Time, Httprelay-Your-Time, Httprelay-Method, Httprelay-Query")
 		w.Header().Set("Access-Control-Expose-Headers", strings.Join(expose, ", "))
+	}
+}
+
+func wildcardCorsHandler(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		wildcardCors(w, r)
+		if r.Method != "OPTIONS" {
+			h(w, r)
+		}
+	}
+}
+
+func wildcardCors(w http.ResponseWriter, r *http.Request) {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		origin = "*"
+	}
+	w.Header().Set("Access-Control-Allow-Origin", origin)
+	//w.Header().Set("HttpRelay-Version", Version)
+
+	if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, SERVE")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+	} else {
+		w.Header().Set("Access-Control-Expose-Headers", "*")
 	}
 }
 

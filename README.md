@@ -2,10 +2,11 @@
 HTTP client to client (web browser to web browser) communication
 
 ## Features
-- Communication with old good and simple HTTP requests (supported by all web browsers and most platforms) 
+- Communication using HTTP requests (supported by the all web browsers and most platforms)
 - Synchronous bidirectional data exchange
-- Synchronous one-directional data transfer
-- Asynchronous and buffered one to many data transfer 
+- Synchronous one directional data transfer
+- Asynchronous and buffered one to many data transfer
+- Client as a server communication method
 - Communication channel ownership
 
 ## Installation
@@ -30,12 +31,12 @@ Make sure [Git is installed](https://git-scm.com/downloads) on your machine and 
 
 ### Test installation
 
-Go to http://localhost:8080/health should display a version number. 
+Go to http://localhost:8080/health should display version number. 
 
 ## Communication methods
 
 ### Sync (Alice <-> Bob)
-Sync communication method provides HTTP client to the HTTP client (web browser to web browser) synchronous data exchange.
+Sync communication method provides HTTP client to HTTP client (web browser to web browser) synchronous data exchange.
 Two requests can exchange data on any HTTP method.
 
 - Alice: `GET https://demo.httprelay.io/sync/your_secret_channel_id?msg=Hello-Bob`
@@ -44,7 +45,7 @@ Two requests can exchange data on any HTTP method.
 URL query data is placed in `httprelay-query` response header field.
 
 - **[Text message exchange example](https://jsfiddle.net/jasajona/y35rLnd9/)** Exchange text messages using just GET requests and query parameters
-- **[GPS tracker example](https://jsfiddle.net/jasajona/cgaju9o8/)** Exchange coordinates and track each others location on a map in real-time
+- **[GPS tracker example](https://jsfiddle.net/jasajona/cgaju9o8/)** Exchange coordinates and track each others location on map in real time
 
 
 If the method supports content transfer (e.g. POST, PUT etc.) data is going to be received as a response body by the counterpart.
@@ -93,54 +94,70 @@ curl -X POST -v -H "Content-Type: text/plain" --data "I love you Alice" https://
 ```
 
 ### Link (Alice -> Bob)
-Link communication method provides HTTP client to HTTP client (web browser to web browser) synchronous one-directional data transfers.
-The Link communication method implements producer -> consumer pattern.
-The producer must use `POST` method, the consumer must use `GET` method.  
+Link communication method provides HTTP client to HTTP client (web browser to web browser) synchronous one directional data transfers.
+Link communication method implements producer -> consumer pattern.
+Producer must use `POST` method, consumer must use `GET` method.  
 
 - Producer: `POST https://demo.httprelay.io/link/your_secret_channel_id`
 - Consumer: `GET https://demo.httprelay.io/link/your_secret_channel_id`
 
-The producer's request will be finished when the consumer makes the request.
-If the consumer makes request prior producer, the receiver request will wait till the producer makes the request.
+Producer's request will be finished when consumer makes the request.
+If consumer makes request prior producer, receiver request will wait till producer makes the request.
 
 - **[Text message transfer example](https://jsfiddle.net/jasajona/q6uhLuqf/)**
 - **[GPS tracker example](https://jsfiddle.net/jasajona/mjrwLc3d/)**
 
 ### Mcast (Alice -> Bob, Carol)
-Mcast communication method provides one-to-many buffered and asynchronous HTTP client to HTTP client (web browser to web browser) data transfers.
-Mcast communication method must be used when there are multiple consumers and the producer doesn't need to know when or if receivers received its data.
+Mcast communication method provides one to many buffered and asynchronous HTTP client to HTTP client (web browser to web browser) data transfers.
+Mcast communication method must be used when there are multiple consumers and producer don't need to know when or if receivers received it's data.
 
 - Producer (Alice): `POST https://httprelay.io/mcast/your_secret_channel_id`
 - Consumer (Bob): `GET https://httprelay.io/mcast/your_secret_channel_id`
 - Consumer (Carol): `GET https://httprelay.io/mcast/your_secret_channel_id`
 
-Producers' request will finish as soon as all data is transferred to the server.
+Producers's request will finish as soon as all data is transferred to the server.
 Currently data is buffered in memory for 20 minutes (next Httprelay versions are going to support more data storage options).
-If the consumer makes request prior producer, consumer request will wait till the producer makes the request.
+If consumer makes request prior producer, consumer request will wait till producer makes the request.
 Each producer request receives `httprelay-query` header field with the currently sent data sequence number.
 Each consumer request receives `httprelay-query` header field with the currently received data sequence number and cookie `SeqId` with the next sequence number.
-Cookies must be enabled or `SeqId` query parameter must be provided in the consumer's request.
-If there is no `SeqId` provided, the consumer will receive the most recent data.
-If the consumer provides `SeqId` greater than the most recent `SeqId`. The request will wait till the new data received from the producer.
+Cookies must be enabled or `SeqId` query parameter must be provided in consumer's request.
+If there is no `SeqId` provided, consumer will receive most recent data.
+If consumer provides `SeqId` greater than most recent `SeqId`. Request will wait till new data received from producer.
 
 - **[Message transfer example](https://jsfiddle.net/jasajona/ntwmheaf/)**
 - **[Multi-user painting example](https://jsfiddle.net/jasajona/ky0cLgf9/)**
 - **[Location sharing example](https://jsfiddle.net/jasajona/5ks1y3nL/)**
 - **[Image exchange example](https://jsfiddle.net/jasajona/f2an7tjh/)**
+
+
+### Proxy (Server <-> Client)
+Proxy communication method allows an HTTP client to act as a server.
+Using this method you can turn web browser or any other HTTP client into a server.
+
+[HTTP Relay JavaScript library](https://gitlab.com/jonas.jasas/httprelay-js) 
+is a small framework that abstracts communication with the HTTP Relay server and lets you feel like your web browser is a server accessible online.
+
+
+- **[Basic usage](https://codesandbox.io/s/ik6w1)**
+- **[Interactive page](https://codesandbox.io/s/gzwuv)**
+- **[File sharing](https://codesandbox.io/s/mrhsf)**
+- **[REST API](https://codesandbox.io/s/uu9l3)**
+- **[Assets](https://codesandbox.io/s/90t1d)**
+
  
 ## Writing permission
-The producer can take ownership of `channel id` by providing `wsecret` query parameter.
+Producer can take ownership of `channel id` by providing `wsecret` query parameter.
 Channel ownership can be set in Link and Mcast communication methods.
 
 `POST https://httprelay.io/mcast/mychan?wsecret=qwerty`
 
-after setting `wsecret=qwerty` on `mychan` channel, subsequent POST requests must provide `wsecret=qwerty` query parameter to write new data into the channel.
+after setting `wsecret=qwerty` on `mychan` channel, subsequent POST requests must provide `wsecret=qwerty` query parameter to write new data in to channel.
 If there are no successful POST requests, channel ownership expires in 20 minutes.
 
 
 
 ## Response headers
-All communication methods receive response header fields with the following information:
+All communication methods receives response header fields with the following information:
 
 - **httprelay-method**: counterpart request HTTP method (GET, POST, PUT, etc.).
 - **httprelay-query**: counterpart request URL query (everything what follows after `?`).
