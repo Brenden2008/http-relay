@@ -118,7 +118,7 @@ docker:release: # --------------------------------------------------------------
   extends: .docker
   only:
     - tags
-    - /v\d*/
+    - /refs\/tags\/v\d*/
 
   services:
     - docker:dind
