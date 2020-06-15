@@ -117,7 +117,7 @@ docker:release: # --------------------------------------------------------------
   stage: release
   extends: .docker
   only:
-    - /refs\/tags\/v\d*/
+    - /^v\d*/
 
   services:
     - docker:dind
