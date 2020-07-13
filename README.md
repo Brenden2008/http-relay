@@ -14,7 +14,9 @@ HTTP client to client (web browser to web browser) communication
 [Download executable](https://gitlab.com/jonas.jasas/httprelay/-/releases) (Linux, Mac, Windows)
 
 ### Docker
-- Latest image: `jonasjasas/httprelay:latest`
+Docker image is built without additional layers. Final image size is less than 3Mb.
+
+- Latest image: `jonasjasas/httprelay`
 - [Image list](https://hub.docker.com/r/jonasjasas/httprelay)
 - Run: `docker run -p 8080:8080 jonasjasas/httprelay`
 

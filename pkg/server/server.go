@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
+// Server version string
 var Version string
 
+// Server instance struct
 type Server struct {
 	net.Listener
 	stopChan  chan struct{}
@@ -23,6 +25,7 @@ type Waiter interface {
 	Wait() <-chan struct{}
 }
 
+// NewServer creates new `HTTP Relay` server instance and returns it.
 func NewServer(listener net.Listener) (server *Server) {
 	server = &Server{
 		stopChan: make(chan struct{}),
@@ -106,6 +109,7 @@ func wildcardCors(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Starts server
 func (s *Server) Start() <-chan error {
 	go repository.Outdate(s.outdaters, time.Minute, s.stopChan)
 
@@ -118,12 +122,14 @@ func (s *Server) Start() <-chan error {
 	return s.errChan
 }
 
+// Stops server
 func (s *Server) Stop(timeout time.Duration) {
 	close(s.stopChan)
 	s.waitAll(timeout)
 	s.Close()
 }
 
+// Returns true if server is active
 func (s *Server) Active() bool {
 	select {
 	case <-s.stopChan:
