@@ -14,9 +14,9 @@ HTTP client to client (web browser to web browser) communication
 [Download executable](https://gitlab.com/jonas.jasas/httprelay/-/releases) (Linux, Mac, Windows)
 
 ### Docker
-- Latest image: `registry.gitlab.com/jonas.jasas/httprelay`
-- [Image list](https://gitlab.com/jonas.jasas/httprelay/container_registry)
-- Run: `docker run -p 8080:8080 registry.gitlab.com/jonas.jasas/httprelay`
+- Latest image: `jonasjasas/httprelay:latest`
+- [Image list](https://hub.docker.com/r/jonasjasas/httprelay)
+- Run: `docker run -p 8080:8080 jonasjasas/httprelay`
 
 ### Build
 Install the package to your [$GOPATH](https://github.com/golang/go/wiki/GOPATH "GOPATH") with the [go tool](https://golang.org/cmd/go/ "go command") from shell:

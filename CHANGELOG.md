@@ -11,11 +11,12 @@ Moving project from SaS to OSS.
     - mcast
     
 
-## v2
+## 2.0.0
 ### Fixed
 
 - CI/CD pipeline
 
 ### Added
 
-- CORS support 
+- CORS support
+- Proxy communication method 
